@@ -1,0 +1,5 @@
+/llm4j/target/
+/llm4j-spring-boot-starter/target/
+/.idea/
+/docs/
+/.vscode/
