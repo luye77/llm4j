@@ -1,6 +1,7 @@
 package com.bobo.llm4j;
 
 import com.bobo.llm4j.config.OpenAiConfig;
+import com.bobo.llm4j.config.QwenConfig;
 import com.bobo.llm4j.interceptor.ContentTypeInterceptor;
 import com.bobo.llm4j.interceptor.ErrorInterceptor;
 import com.bobo.llm4j.network.ConnectionPoolProvider;
@@ -29,19 +30,23 @@ import java.security.NoSuchAlgorithmException;
 @Configuration
 @EnableConfigurationProperties({
         OpenAiConfigProperties.class,
+        QwenConfigProperties.class,
         OkHttpConfigProperties.class,
 })
 public class AiConfigAutoConfiguration {
 
     private final OkHttpConfigProperties okHttpConfigProperties;
     private final OpenAiConfigProperties openAiConfigProperties;
+    private final QwenConfigProperties qwenConfigProperties;
 
     private com.bobo.llm4j.service.Configuration configuration = new com.bobo.llm4j.service.Configuration();
 
-    public AiConfigAutoConfiguration(OkHttpConfigProperties okHttpConfigProperties, 
-                                      OpenAiConfigProperties openAiConfigProperties) {
+    public AiConfigAutoConfiguration(OkHttpConfigProperties okHttpConfigProperties,
+                                     OpenAiConfigProperties openAiConfigProperties,
+                                     QwenConfigProperties qwenConfigProperties) {
         this.okHttpConfigProperties = okHttpConfigProperties;
         this.openAiConfigProperties = openAiConfigProperties;
+        this.qwenConfigProperties = qwenConfigProperties;
     }
 
     @Bean
@@ -53,6 +58,7 @@ public class AiConfigAutoConfiguration {
     private void init() {
         initOkHttp();
         initOpenAiConfig();
+        initQwenConfig();
     }
 
     private void initOkHttp() {
@@ -108,5 +114,22 @@ public class AiConfigAutoConfiguration {
         openAiConfig.setEmbeddingUrl(openAiConfigProperties.getEmbeddingUrl());
 
         configuration.setOpenAiConfig(openAiConfig);
+    }
+
+    /**
+     * 初始化通义千问配置信息
+     */
+    private void initQwenConfig() {
+        QwenConfig qwenConfig = new QwenConfig();
+        qwenConfig.setApiHost(qwenConfigProperties.getApiHost());
+        qwenConfig.setApiKey(qwenConfigProperties.getApiKey());
+        qwenConfig.setChatCompletionUrl(qwenConfigProperties.getChatCompletionUrl());
+        qwenConfig.setEmbeddingUrl(qwenConfigProperties.getEmbeddingUrl());
+        qwenConfig.setCompatibleMode(qwenConfigProperties.isCompatibleMode());
+        qwenConfig.setDashscopeChatCompletionUrl(qwenConfigProperties.getDashscopeChatCompletionUrl());
+        qwenConfig.setDashscopeMultiModalCompletionUrl(qwenConfigProperties.getDashscopeMultiModalCompletionUrl());
+        qwenConfig.setDashscopeEmbeddingUrl(qwenConfigProperties.getDashscopeEmbeddingUrl());
+
+        configuration.setQwenConfig(qwenConfig);
     }
 }

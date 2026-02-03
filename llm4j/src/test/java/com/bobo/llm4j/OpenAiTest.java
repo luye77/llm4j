@@ -266,7 +266,6 @@ public class OpenAiTest {
 
         } catch (Exception e) {
             System.err.println("测试失败: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 }

@@ -2,6 +2,8 @@ package com.bobo.llm4j.service.factor;
 
 import com.bobo.llm4j.platform.openai.chat.OpenAiChatModel;
 import com.bobo.llm4j.platform.openai.embedding.OpenAiEmbeddingModel;
+import com.bobo.llm4j.platform.qwen.chat.QwenChatModel;
+import com.bobo.llm4j.platform.qwen.embedding.QwenEmbeddingModel;
 import com.bobo.llm4j.service.*;
 
 /**
@@ -27,6 +29,14 @@ public class AiService {
 
     public EmbeddingModel getEmbeddingModel() {
         return new OpenAiEmbeddingModel(configuration);
+    }
+
+    public ChatModel getQwenChatModel() {
+        return new QwenChatModel(configuration);
+    }
+
+    public EmbeddingModel getQwenEmbeddingModel() {
+        return new QwenEmbeddingModel(configuration);
     }
 
 }
