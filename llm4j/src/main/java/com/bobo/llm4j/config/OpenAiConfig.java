@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Author cly
+ * @Author bo
  * @Description OpenAi平台配置文件信息
  * @Date 2024/8/8 0:18
  */

@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
- * @Author cly
+ * @Author bo
  * @Description OkHttp配置信息
  * @Date 2024/8/11 0:11
  */

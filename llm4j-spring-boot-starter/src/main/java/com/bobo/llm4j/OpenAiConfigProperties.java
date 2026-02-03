@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * @Author cly
+ * @Author bo
  * @Description OpenAI配置文件
  * @Date 2024/8/9 23:17
  */

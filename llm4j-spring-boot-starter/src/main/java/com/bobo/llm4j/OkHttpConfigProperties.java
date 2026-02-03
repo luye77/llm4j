@@ -8,7 +8,7 @@ import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Author cly
+ * @Author bo
  * @Description OkHttp配置文件
  * @Date 2024/8/10 0:49
  */
@@ -28,7 +28,7 @@ public class OkHttpConfigProperties {
     private TimeUnit timeUnit = TimeUnit.SECONDS;
 
     /**
-     * 忽略SSL证书，用于请求Moonshot(Kimi)，其它平台可以不用忽�?
+     * 忽略SSL证书，用于请求Moonshot(Kimi)，其它平台可以不用忽�?
      */
     private boolean ignoreSsl = true;
 }

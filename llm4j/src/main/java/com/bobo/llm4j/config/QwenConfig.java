@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Author cly
+ * @Author bo
  * @Description 通义千问平台配置文件信息 (Qwen, OpenAI兼容模式)
  * @Date 2026/2/2
  */

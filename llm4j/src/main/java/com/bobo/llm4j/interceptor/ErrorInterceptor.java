@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
- * @Author cly
- * @Description 错误处理�?
+ * @Author bo
+ * @Description 错误处理�?
  * @Date 2024/8/29 14:55
  */
 @Slf4j
@@ -27,7 +27,7 @@ public class ErrorInterceptor implements Interceptor {
 
         // 判断是否为流式响应，流式响应Content-Type为text/event-stream
         if (isStreamingResponse(response)) {
-            return response; // 直接返回，不处理流式响应�?
+            return response; // 直接返回，不处理流式响应�?
         }
 
         if (!response.isSuccessful() && (response.code() != 100 && response.code() != 101)) {

@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
- * @Author cly
+ * @Author bo
  * @Description TODO
  * @Date 2024/9/20 18:56
  */
@@ -19,20 +19,20 @@ public class ContentTypeInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        // 发起请求并获取响�?
+        // 发起请求并获取响�?
         Response response = chain.proceed(chain.request());
 
         // 检查Content-Type是否为application/x-ndjson
         if (response.header("Content-Type") != null &&
                 response.header("Content-Type").contains("application/x-ndjson")) {
 
-            // 获取原始响应�?
+            // 获取原始响应�?
             ResponseBody responseBody = response.body();
             BufferedSource source = responseBody.source();
-            source.request(Long.MAX_VALUE); // 缓冲整个响应�?
+            source.request(Long.MAX_VALUE); // 缓冲整个响应�?
             Buffer buffer = source.getBuffer();
 
-            // 读取响应体并将其按换行符分割，模拟处�?application/x-ndjson -> text/event-stream
+            // 读取响应体并将其按换行符分割，模拟处�?application/x-ndjson -> text/event-stream
             String bodyString = buffer.clone().readString(StandardCharsets.UTF_8);
             String[] ndjsonLines = bodyString.split("\n");
 

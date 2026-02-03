@@ -23,7 +23,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * @Author cly
+ * @Author bo
  * @Description AI Configuration Auto Configuration
  * @Date 2024/8/9 23:22
  */

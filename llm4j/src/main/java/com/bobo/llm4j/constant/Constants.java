@@ -1,7 +1,7 @@
 package com.bobo.llm4j.constant;
 
 /**
- * @Author cly
+ * @Author bo
  * @Description TODO
  * @Date 2024/8/11 0:19
  */

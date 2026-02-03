@@ -7,7 +7,7 @@ import com.bobo.llm4j.platform.qwen.embedding.QwenEmbeddingModel;
 import com.bobo.llm4j.service.*;
 
 /**
- * @Author cly
+ * @Author bo
  * @Description AI服务工厂，创建ChatModel和EmbeddingModel
  * @Date 2024/8/7 18:10
  */

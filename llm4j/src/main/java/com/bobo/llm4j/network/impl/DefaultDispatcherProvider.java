@@ -4,7 +4,7 @@ import com.bobo.llm4j.network.DispatcherProvider;
 import okhttp3.Dispatcher;
 
 /**
- * @Author cly
+ * @Author bo
  * @Description Dispatcher默认实现
  * @Date 2024/10/16 23:11
  */
