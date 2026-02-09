@@ -1,8 +1,8 @@
 package com.bobo.llm4j.chat.messages;
 
 
-import com.bobo.llm4j.platform.openai.chat.entity.Media;
-import com.bobo.llm4j.platform.openai.chat.entity.Message;
+import com.bobo.llm4j.chat.entity.Media;
+import com.bobo.llm4j.chat.entity.Message;
 
 /**
  * Abstract base for messages

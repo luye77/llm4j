@@ -6,9 +6,11 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 import okio.BufferedSource;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /**
  * @Author bo
@@ -17,22 +19,24 @@ import java.nio.charset.StandardCharsets;
  */
 public class ContentTypeInterceptor implements Interceptor {
 
+    @NotNull
     @Override
     public Response intercept(Chain chain) throws IOException {
-        // 发起请求并获取响�?
+        // 发起请求并获取响应
         Response response = chain.proceed(chain.request());
 
         // 检查Content-Type是否为application/x-ndjson
         if (response.header("Content-Type") != null &&
-                response.header("Content-Type").contains("application/x-ndjson")) {
+                Objects.requireNonNull(response.header("Content-Type")).contains("application/x-ndjson")) {
 
-            // 获取原始响应�?
+            // 获取原始响应?
             ResponseBody responseBody = response.body();
+            assert responseBody != null;
             BufferedSource source = responseBody.source();
-            source.request(Long.MAX_VALUE); // 缓冲整个响应�?
+            source.request(Long.MAX_VALUE); // 缓冲整个响应?
             Buffer buffer = source.getBuffer();
 
-            // 读取响应体并将其按换行符分割，模拟处�?application/x-ndjson -> text/event-stream
+            // 读取响应体并将其按换行符分割 application/x-ndjson -> text/event-stream
             String bodyString = buffer.clone().readString(StandardCharsets.UTF_8);
             String[] ndjsonLines = bodyString.split("\n");
 

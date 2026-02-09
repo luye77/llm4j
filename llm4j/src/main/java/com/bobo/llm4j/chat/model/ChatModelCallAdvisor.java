@@ -4,8 +4,8 @@ import com.bobo.llm4j.chat.client.ChatClientRequest;
 import com.bobo.llm4j.chat.client.ChatClientResponse;
 import com.bobo.llm4j.chat.client.advisor.Advisor;
 import com.bobo.llm4j.chat.util.DefaultChatClientUtils;
-import com.bobo.llm4j.platform.openai.chat.entity.ChatResponse;
-import com.bobo.llm4j.platform.openai.chat.entity.Prompt;
+import com.bobo.llm4j.chat.entity.ChatResponse;
+import com.bobo.llm4j.chat.entity.Prompt;
 
 /**
  * Advisor for calling chat model

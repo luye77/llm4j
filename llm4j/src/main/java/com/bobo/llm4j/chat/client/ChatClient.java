@@ -8,13 +8,11 @@ import com.bobo.llm4j.chat.prompt.ChatOptions;
 import com.bobo.llm4j.http.Flux;
 import com.bobo.llm4j.http.MimeType;
 import com.bobo.llm4j.http.ResponseEntity;
-import com.bobo.llm4j.platform.openai.chat.entity.ChatResponse;
-import com.bobo.llm4j.platform.openai.chat.entity.Media;
-import com.bobo.llm4j.platform.openai.chat.entity.Message;
-import com.bobo.llm4j.platform.openai.chat.entity.Prompt;
+import com.bobo.llm4j.chat.entity.ChatResponse;
+import com.bobo.llm4j.chat.entity.Media;
+import com.bobo.llm4j.chat.entity.Message;
+import com.bobo.llm4j.chat.entity.Prompt;
 import com.bobo.llm4j.template.TemplateRenderer;
-import com.bobo.llm4j.tool.ToolCallback;
-import com.bobo.llm4j.tool.ToolCallbackProvider;
 
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -201,18 +199,6 @@ public interface ChatClient {
 
         <T extends ChatOptions> ChatClientRequestSpec options(T options);
 
-        ChatClientRequestSpec toolNames(String... toolNames);
-
-        ChatClientRequestSpec tools(Object... toolObjects);
-
-        ChatClientRequestSpec toolCallbacks(ToolCallback... toolCallbacks);
-
-        ChatClientRequestSpec toolCallbacks(List<ToolCallback> toolCallbacks);
-
-        ChatClientRequestSpec toolCallbacks(ToolCallbackProvider... toolCallbackProviders);
-
-        ChatClientRequestSpec toolContext(Map<String, Object> toolContext);
-
         ChatClientRequestSpec system(String text);
 
         ChatClientRequestSpec system(Resource textResource, Charset charset);
@@ -267,18 +253,6 @@ public interface ChatClient {
         Builder defaultSystem(Consumer<PromptSystemSpec> systemSpecConsumer);
 
         Builder defaultTemplateRenderer(TemplateRenderer templateRenderer);
-
-        Builder defaultToolNames(String... toolNames);
-
-        Builder defaultTools(Object... toolObjects);
-
-        Builder defaultToolCallbacks(ToolCallback... toolCallbacks);
-
-        Builder defaultToolCallbacks(List<ToolCallback> toolCallbacks);
-
-        Builder defaultToolCallbacks(ToolCallbackProvider... toolCallbackProviders);
-
-        Builder defaultToolContext(Map<String, Object> toolContext);
 
         Builder clone();
 

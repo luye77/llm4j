@@ -17,16 +17,13 @@ import com.bobo.llm4j.chat.util.StringUtils;
 import com.bobo.llm4j.http.Flux;
 import com.bobo.llm4j.http.MimeType;
 import com.bobo.llm4j.http.ResponseEntity;
-import com.bobo.llm4j.platform.openai.chat.entity.ChatResponse;
-import com.bobo.llm4j.platform.openai.chat.entity.Generation;
-import com.bobo.llm4j.platform.openai.chat.entity.Media;
-import com.bobo.llm4j.platform.openai.chat.entity.Message;
-import com.bobo.llm4j.platform.openai.chat.entity.Prompt;
+import com.bobo.llm4j.chat.entity.ChatResponse;
+import com.bobo.llm4j.chat.entity.Generation;
+import com.bobo.llm4j.chat.entity.Media;
+import com.bobo.llm4j.chat.entity.Message;
+import com.bobo.llm4j.chat.entity.Prompt;
 import com.bobo.llm4j.template.StTemplateRenderer;
 import com.bobo.llm4j.template.TemplateRenderer;
-import com.bobo.llm4j.tool.ToolCallback;
-import com.bobo.llm4j.tool.ToolCallbackProvider;
-import com.bobo.llm4j.tool.ToolCallbacks;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -525,10 +522,6 @@ public class DefaultChatClient implements ChatClient {
 
         private final List<Media> media = new ArrayList<>();
 
-        private final List<String> toolNames = new ArrayList<>();
-
-        private final List<ToolCallback> toolCallbacks = new ArrayList<>();
-
         private final List<Message> messages = new ArrayList<>();
 
         private final Map<String, Object> userParams = new HashMap<>();
@@ -538,8 +531,6 @@ public class DefaultChatClient implements ChatClient {
         private final List<Advisor> advisors = new ArrayList<>();
 
         private final Map<String, Object> advisorParams = new HashMap<>();
-
-        private final Map<String, Object> toolContext = new HashMap<>();
 
         private TemplateRenderer templateRenderer;
 
@@ -554,30 +545,27 @@ public class DefaultChatClient implements ChatClient {
 
         /* copy constructor */
         DefaultChatClientRequestSpec(DefaultChatClientRequestSpec ccr) {
-            this(ccr.chatModel, ccr.userText, ccr.userParams, ccr.systemText, ccr.systemParams, ccr.toolCallbacks,
-                    ccr.messages, ccr.toolNames, ccr.media, ccr.chatOptions, ccr.advisors, ccr.advisorParams,
-                    ccr.observationRegistry, ccr.observationConvention, ccr.toolContext, ccr.templateRenderer);
+            this(ccr.chatModel, ccr.userText, ccr.userParams, ccr.systemText, ccr.systemParams,
+                    ccr.messages, ccr.media, ccr.chatOptions, ccr.advisors, ccr.advisorParams,
+                    ccr.observationRegistry, ccr.observationConvention, ccr.templateRenderer);
         }
 
         public DefaultChatClientRequestSpec(ChatModel chatModel, @Nullable String userText,
                                             Map<String, Object> userParams, @Nullable String systemText, Map<String, Object> systemParams,
-                                            List<ToolCallback> toolCallbacks, List<Message> messages, List<String> toolNames, List<Media> media,
+                                            List<Message> messages, List<Media> media,
                                             @Nullable ChatOptions chatOptions, List<Advisor> advisors, Map<String, Object> advisorParams,
                                             ObservationRegistry observationRegistry,
-                                            @Nullable ChatClientObservationConvention observationConvention, Map<String, Object> toolContext,
+                                            @Nullable ChatClientObservationConvention observationConvention,
                                             @Nullable TemplateRenderer templateRenderer) {
 
             Assert.notNull(chatModel, "chatModel cannot be null");
             Assert.notNull(userParams, "userParams cannot be null");
             Assert.notNull(systemParams, "systemParams cannot be null");
-            Assert.notNull(toolCallbacks, "toolCallbacks cannot be null");
             Assert.notNull(messages, "messages cannot be null");
-            Assert.notNull(toolNames, "toolNames cannot be null");
             Assert.notNull(media, "media cannot be null");
             Assert.notNull(advisors, "advisors cannot be null");
             Assert.notNull(advisorParams, "advisorParams cannot be null");
             Assert.notNull(observationRegistry, "observationRegistry cannot be null");
-            Assert.notNull(toolContext, "toolContext cannot be null");
 
             this.chatModel = chatModel;
             this.chatOptions = chatOptions != null ? chatOptions.copy()
@@ -588,8 +576,6 @@ public class DefaultChatClient implements ChatClient {
             this.systemText = systemText;
             this.systemParams.putAll(systemParams);
 
-            this.toolNames.addAll(toolNames);
-            this.toolCallbacks.addAll(toolCallbacks);
             this.messages.addAll(messages);
             this.media.addAll(media);
             this.advisors.addAll(advisors);
@@ -597,7 +583,6 @@ public class DefaultChatClient implements ChatClient {
             this.observationRegistry = observationRegistry;
             this.observationConvention = observationConvention != null ? observationConvention
                     : DEFAULT_CHAT_CLIENT_OBSERVATION_CONVENTION;
-            this.toolContext.putAll(toolContext);
             this.templateRenderer = templateRenderer != null ? templateRenderer : DEFAULT_TEMPLATE_RENDERER;
         }
 
@@ -613,10 +598,7 @@ public class DefaultChatClient implements ChatClient {
         public ChatClient.Builder mutate() {
             DefaultChatClientBuilder builder = (DefaultChatClientBuilder) ChatClient
                     .builder(this.chatModel, this.observationRegistry, this.observationConvention)
-                    .defaultTemplateRenderer(this.templateRenderer)
-                    .defaultToolCallbacks(this.toolCallbacks)
-                    .defaultToolContext(this.toolContext)
-                    .defaultToolNames(StringUtils.toStringArray(this.toolNames));
+                    .defaultTemplateRenderer(this.templateRenderer);
 
             if (StringUtils.hasText(this.userText)) {
                 builder.defaultUser(this.userText);
@@ -671,49 +653,6 @@ public class DefaultChatClient implements ChatClient {
         public <T extends ChatOptions> ChatClientRequestSpec options(T options) {
             Assert.notNull(options, "options cannot be null");
             this.chatOptions = options;
-            return this;
-        }
-
-        @Override
-        public ChatClientRequestSpec toolNames(String... toolNames) {
-            Assert.notNull(toolNames, "toolNames cannot be null");
-            this.toolNames.addAll(Arrays.asList(toolNames));
-            return this;
-        }
-
-        @Override
-        public ChatClientRequestSpec toolCallbacks(ToolCallback... toolCallbacks) {
-            Assert.notNull(toolCallbacks, "toolCallbacks cannot be null");
-            this.toolCallbacks.addAll(Arrays.asList(toolCallbacks));
-            return this;
-        }
-
-        @Override
-        public ChatClientRequestSpec toolCallbacks(List<ToolCallback> toolCallbacks) {
-            Assert.notNull(toolCallbacks, "toolCallbacks cannot be null");
-            this.toolCallbacks.addAll(toolCallbacks);
-            return this;
-        }
-
-        @Override
-        public ChatClientRequestSpec tools(Object... toolObjects) {
-            Assert.notNull(toolObjects, "toolObjects cannot be null");
-            this.toolCallbacks.addAll(Arrays.asList(ToolCallbacks.from(toolObjects)));
-            return this;
-        }
-
-        @Override
-        public ChatClientRequestSpec toolCallbacks(ToolCallbackProvider... toolCallbackProviders) {
-            Assert.notNull(toolCallbackProviders, "toolCallbackProviders cannot be null");
-            for (ToolCallbackProvider toolCallbackProvider : toolCallbackProviders) {
-                this.toolCallbacks.addAll(Arrays.asList(toolCallbackProvider.getToolCallbacks()));
-            }
-            return this;
-        }
-
-        public ChatClientRequestSpec toolContext(Map<String, Object> toolContext) {
-            Assert.notNull(toolContext, "toolContext cannot be null");
-            this.toolContext.putAll(toolContext);
             return this;
         }
 

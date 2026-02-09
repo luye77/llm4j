@@ -3,8 +3,8 @@ package com.bobo.llm4j.chat.util;
 import com.bobo.llm4j.chat.client.ChatClientRequest;
 import com.bobo.llm4j.chat.client.DefaultChatClient;
 import com.bobo.llm4j.chat.prompt.ChatOptions;
-import com.bobo.llm4j.platform.openai.chat.entity.Message;
-import com.bobo.llm4j.platform.openai.chat.entity.Prompt;
+import com.bobo.llm4j.chat.entity.Message;
+import com.bobo.llm4j.chat.entity.Prompt;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,8 +22,6 @@ public class DefaultChatClientUtils {
         return new ChatClientRequest(
             spec.getMessages(),
             spec.getChatOptions(),
-            spec.getToolNames(),
-            spec.getToolCallbacks(),
             new HashMap<>(),
             spec.getMedia()
         );

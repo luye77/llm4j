@@ -4,10 +4,8 @@ import com.bobo.llm4j.config.OpenAiConfig;
 import com.bobo.llm4j.interceptor.ContentTypeInterceptor;
 import com.bobo.llm4j.network.ConnectionPoolProvider;
 import com.bobo.llm4j.network.DispatcherProvider;
-import com.bobo.llm4j.service.ChatModel;
-import com.bobo.llm4j.service.Configuration;
-import com.bobo.llm4j.service.EmbeddingModel;
-import com.bobo.llm4j.service.factor.AiService;
+import com.bobo.llm4j.chat.model.ChatModel;
+import com.bobo.llm4j.config.Configuration;
 import com.bobo.llm4j.utils.OkHttpUtil;
 import com.bobo.llm4j.utils.ServiceLoaderUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -91,16 +89,6 @@ public abstract class BaseTest {
     protected static final int WRITE_TIMEOUT = 300;
 
     /**
-     * AI服务工厂
-     */
-    protected AiService aiService;
-
-    /**
-     * 嵌入模型
-     */
-    protected EmbeddingModel embeddingModel;
-
-    /**
      * 聊天模型
      */
     protected ChatModel chatModel;
@@ -123,7 +111,6 @@ public abstract class BaseTest {
     public void setUp() throws NoSuchAlgorithmException, KeyManagementException {
         initConfiguration();
         initOkHttpClient();
-        initAiService();
         log.info("测试环境初始化完成");
     }
 
@@ -174,14 +161,5 @@ public abstract class BaseTest {
         }
 
         configuration.setOkHttpClient(builder.build());
-    }
-
-    /**
-     * 初始化AI服务
-     */
-    private void initAiService() {
-        aiService = new AiService(configuration);
-        embeddingModel = aiService.getEmbeddingModel();
-        chatModel = aiService.getChatModel();
     }
 }

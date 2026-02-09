@@ -6,7 +6,6 @@ import com.bobo.llm4j.interceptor.ContentTypeInterceptor;
 import com.bobo.llm4j.interceptor.ErrorInterceptor;
 import com.bobo.llm4j.network.ConnectionPoolProvider;
 import com.bobo.llm4j.network.DispatcherProvider;
-import com.bobo.llm4j.service.factor.AiService;
 import com.bobo.llm4j.utils.OkHttpUtil;
 import com.bobo.llm4j.utils.ServiceLoaderUtil;
 import okhttp3.OkHttpClient;
@@ -39,7 +38,7 @@ public class AiConfigAutoConfiguration {
     private final OpenAiConfigProperties openAiConfigProperties;
     private final QwenConfigProperties qwenConfigProperties;
 
-    private final com.bobo.llm4j.service.Configuration configuration = new com.bobo.llm4j.service.Configuration();
+    private final com.bobo.llm4j.config.Configuration configuration = new com.bobo.llm4j.config.Configuration();
 
     public AiConfigAutoConfiguration(OkHttpConfigProperties okHttpConfigProperties,
                                      OpenAiConfigProperties openAiConfigProperties,
