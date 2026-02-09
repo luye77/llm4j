@@ -1,6 +1,7 @@
 package com.bobo.llm4j.chat.client;
 
-import com.bobo.llm4j.platform.openai.chat.entity.ChatResponse;
+import com.bobo.llm4j.chat.entity.ChatResponse;
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.Map;
 public class ChatClientResponse {
     
     private final ChatResponse chatResponse;
+    @Getter
     private final Map<String, Object> metadata;
     
     private ChatClientResponse(Builder builder) {
@@ -21,18 +23,14 @@ public class ChatClientResponse {
     public ChatResponse chatResponse() {
         return chatResponse;
     }
-    
-    public Map<String, Object> getMetadata() {
-        return metadata;
-    }
-    
+
     public static Builder builder() {
         return new Builder();
     }
     
     public static class Builder {
         private ChatResponse chatResponse;
-        private Map<String, Object> metadata = new HashMap<>();
+        private final Map<String, Object> metadata = new HashMap<>();
         
         public Builder chatResponse(ChatResponse chatResponse) {
             this.chatResponse = chatResponse;

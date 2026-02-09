@@ -4,12 +4,11 @@ import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.bobo.llm4j.exception.CommonException;
-import com.bobo.llm4j.platform.openai.chat.entity.ChatResponse;
-import com.bobo.llm4j.platform.openai.chat.entity.Message;
-import com.bobo.llm4j.platform.openai.chat.entity.Generation;
-import com.bobo.llm4j.platform.openai.chat.entity.Usage;
-import com.bobo.llm4j.platform.openai.chat.enums.MessageType;
-import com.bobo.llm4j.platform.openai.tool.ToolCall;
+import com.bobo.llm4j.chat.entity.ChatResponse;
+import com.bobo.llm4j.chat.entity.Message;
+import com.bobo.llm4j.chat.entity.Generation;
+import com.bobo.llm4j.chat.entity.Usage;
+import com.bobo.llm4j.enums.MessageType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -56,12 +55,6 @@ public abstract class StreamingResponseHandler extends EventSourceListener {
     private String currData = "";
 
     /**
-     * 记录当前所调用函数工具的名称
-     */
-    @Getter
-    private String currToolName = "";
-
-    /**
      * 记录当前是否为思考状态
      */
     @Getter
@@ -74,30 +67,10 @@ public abstract class StreamingResponseHandler extends EventSourceListener {
     private final StringBuilder reasoningOutput = new StringBuilder();
 
     /**
-     * 是否显示每个函数调用输出的参数文本
-     */
-    @Getter
-    @Setter
-    private boolean showToolArgs = false;
-
-    /**
      * Token使用量
      */
     @Getter
     private final Usage usage = new Usage();
-
-    @Setter
-    @Getter
-    private List<ToolCall> toolCalls = new ArrayList<>();
-
-    @Setter
-    @Getter
-    private ToolCall toolCall;
-
-    /**
-     * 最终的函数调用参数
-     */
-    private final StringBuilder argument = new StringBuilder();
 
     @Getter
     private CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -179,34 +152,6 @@ public abstract class StreamingResponseHandler extends EventSourceListener {
 
         finishReason = generations.get(0).getFinishReason();
 
-        // 函数调用处理
-        if("stop".equals(finishReason)
-                && responseMessage.getContent()!=null
-                && "".equals(responseMessage.getContent().getText())
-                && !toolCalls.isEmpty()){
-            finishReason = "tool_calls";
-        }
-
-        if("tool_calls".equals(finishReason)){
-            if(toolCall == null && responseMessage.getToolCalls()!=null) {
-                toolCalls = responseMessage.getToolCalls();
-                if(showToolArgs){
-                    this.currStr = responseMessage.getToolCalls().get(0).getFunction().getArguments();
-                    this.send();
-                }
-                return;
-            }
-
-            if(toolCall != null) {
-                argument.append(StrUtil.emptyIfNull(responseMessage.getToolCalls().get(0).getFunction().getArguments()));
-                toolCall.getFunction().setArguments(argument.toString());
-                toolCalls.add(toolCall);
-            }
-            argument.setLength(0);
-            currToolName = "";
-            return;
-        }
-
         if ("stop".equals(finishReason)) {
             if(responseMessage.getContent() != null && responseMessage.getContent().getText() != null) {
                 currStr = responseMessage.getContent().getText();
@@ -220,66 +165,25 @@ public abstract class StreamingResponseHandler extends EventSourceListener {
 
         if(MessageType.ASSISTANT.getRole().equals(responseMessage.getRole())
                 && (responseMessage.getContent()==null || StringUtils.isEmpty(responseMessage.getContent().getText()))
-                && StringUtils.isEmpty(responseMessage.getReasoningContent())
-                && responseMessage.getToolCalls() == null){
+                && StringUtils.isEmpty(responseMessage.getReasoningContent())){
             return;
         }
 
-        if(responseMessage.getToolCalls() == null ) {
-            if(toolCall !=null && StringUtils.isNotEmpty(argument)&& "assistant".equals(responseMessage.getRole()) && (responseMessage.getContent()!=null && StringUtils.isNotEmpty(responseMessage.getContent().getText())) ){
+        if(StringUtils.isNotEmpty(responseMessage.getReasoningContent())){
+            isReasoning = true;
+            reasoningOutput.append(responseMessage.getReasoningContent());
+            currStr = responseMessage.getReasoningContent();
+        }else {
+            isReasoning = false;
+            if (responseMessage.getContent() == null) {
+                this.send();
                 return;
             }
-
-            if(StringUtils.isNotEmpty(responseMessage.getReasoningContent())){
-                isReasoning = true;
-                reasoningOutput.append(responseMessage.getReasoningContent());
-                currStr = responseMessage.getReasoningContent();
-            }else {
-                isReasoning = false;
-                if (responseMessage.getContent() == null) {
-                    this.send();
-                    return;
-                }
-                output.append(responseMessage.getContent().getText());
-                currStr = responseMessage.getContent().getText();
-            }
-
-            this.send();
-        }else{
-            if(responseMessage.getContent()!=null
-               && "".equals(responseMessage.getContent().getText())){
-                currToolName = responseMessage.getToolCalls().get(0).getFunction().getName();
-                toolCalls.add(responseMessage.getToolCalls().get(0));
-
-                if(showToolArgs){
-                    this.currStr = responseMessage.getToolCalls().get(0).getFunction().getArguments();
-                    this.send();
-                }
-            }else{
-                if(StrUtil.isNotBlank(responseMessage.getToolCalls().get(0).getId())) {
-                    if( toolCall == null ){
-                        toolCall = responseMessage.getToolCalls().get(0);
-                        argument.append(StrUtil.emptyIfNull(responseMessage.getToolCalls().get(0).getFunction().getArguments()));
-                    }else {
-                        toolCall.getFunction().setArguments(argument.toString());
-                        argument.setLength(0);
-                        toolCalls.add(toolCall);
-                        toolCall = responseMessage.getToolCalls().get(0);
-                    }
-
-                    currToolName = responseMessage.getToolCalls().get(0).getFunction().getName();
-                    if(showToolArgs){
-                        this.send();
-                    }
-                }else {
-                    argument.append(responseMessage.getToolCalls().get(0).getFunction().getArguments());
-                    if(showToolArgs){
-                        this.currStr = responseMessage.getToolCalls().get(0).getFunction().getArguments();
-                        this.send();
-                    }
-                }
-            }
+            output.append(responseMessage.getContent().getText());
+            currStr = responseMessage.getContent().getText();
         }
+
+        this.send();
     }
 
     @Override

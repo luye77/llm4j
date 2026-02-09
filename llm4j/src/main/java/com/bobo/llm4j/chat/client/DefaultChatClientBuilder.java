@@ -5,12 +5,9 @@ import com.bobo.llm4j.chat.client.advisor.Advisor;
 import com.bobo.llm4j.chat.model.ChatModel;
 import com.bobo.llm4j.chat.prompt.ChatOptions;
 import com.bobo.llm4j.chat.util.StringUtils;
-import com.bobo.llm4j.platform.openai.chat.entity.Media;
-import com.bobo.llm4j.platform.openai.chat.entity.Message;
+import com.bobo.llm4j.chat.entity.Media;
+import com.bobo.llm4j.chat.entity.Message;
 import com.bobo.llm4j.template.TemplateRenderer;
-import com.bobo.llm4j.tool.ToolCallback;
-import com.bobo.llm4j.tool.ToolCallbackProvider;
-import com.bobo.llm4j.tool.ToolCallbacks;
 import com.google.common.collect.Lists;
 
 import java.io.IOException;
@@ -32,9 +29,6 @@ public class DefaultChatClientBuilder implements ChatClient.Builder {
     
     private final List<Advisor> advisors = new ArrayList<>();
     private final Map<String, Object> advisorParams = new HashMap<>();
-    private final List<String> toolNames = new ArrayList<>();
-    private final List<ToolCallback> toolCallbacks = new ArrayList<>();
-    private final Map<String, Object> toolContext = new HashMap<>();
     private final Map<String, Object> userParams = new HashMap<>();
     private final Map<String, Object> systemParams = new HashMap<>();
     private final List<Message> messages = new ArrayList<>();
@@ -165,64 +159,12 @@ public class DefaultChatClientBuilder implements ChatClient.Builder {
     }
     
     @Override
-    public ChatClient.Builder defaultToolNames(String... toolNames) {
-        Assert.notNull(toolNames, "toolNames cannot be null");
-        Assert.noNullElements(toolNames, "toolNames cannot contain null elements");
-        this.toolNames.addAll(Lists.newArrayList(toolNames));
-        return this;
-    }
-    
-    @Override
-    public ChatClient.Builder defaultTools(Object... toolObjects) {
-        Assert.notNull(toolObjects, "toolObjects cannot be null");
-        Assert.noNullElements(toolObjects, "toolObjects cannot contain null elements");
-        ToolCallback[] callbacks = ToolCallbacks.from(toolObjects);
-        this.toolCallbacks.addAll(Lists.newArrayList(callbacks));
-        return this;
-    }
-    
-    @Override
-    public ChatClient.Builder defaultToolCallbacks(ToolCallback... toolCallbacks) {
-        Assert.notNull(toolCallbacks, "toolCallbacks cannot be null");
-        Assert.noNullElements(toolCallbacks, "toolCallbacks cannot contain null elements");
-        this.toolCallbacks.addAll(Lists.newArrayList(toolCallbacks));
-        return this;
-    }
-    
-    @Override
-    public ChatClient.Builder defaultToolCallbacks(List<ToolCallback> toolCallbacks) {
-        Assert.notNull(toolCallbacks, "toolCallbacks cannot be null");
-        this.toolCallbacks.addAll(toolCallbacks);
-        return this;
-    }
-    
-    @Override
-    public ChatClient.Builder defaultToolCallbacks(ToolCallbackProvider... toolCallbackProviders) {
-        Assert.notNull(toolCallbackProviders, "toolCallbackProviders cannot be null");
-        Assert.noNullElements(toolCallbackProviders, "toolCallbackProviders cannot contain null elements");
-        for (ToolCallbackProvider provider : toolCallbackProviders) {
-            this.toolCallbacks.addAll(Lists.newArrayList(provider.getToolCallbacks()));
-        }
-        return this;
-    }
-    
-    @Override
-    public ChatClient.Builder defaultToolContext(Map<String, Object> toolContext) {
-        Assert.notNull(toolContext, "toolContext cannot be null");
-        this.toolContext.putAll(toolContext);
-        return this;
-    }
-    
-    @Override
     public ChatClient.Builder clone() {
         DefaultChatClientBuilder clone = new DefaultChatClientBuilder(
             this.chatModel, this.observationRegistry, this.observationConvention);
         
         clone.advisors.addAll(this.advisors);
         clone.advisorParams.putAll(this.advisorParams);
-        clone.toolNames.addAll(this.toolNames);
-        clone.toolCallbacks.addAll(this.toolCallbacks);
-        clone.toolContext.putAll(this.toolContext);
         clone.userParams.putAll(this.userParams);
         clone.systemParams.putAll(this.systemParams);
         clone.messages.addAll(this.messages);
@@ -245,16 +187,13 @@ public class DefaultChatClientBuilder implements ChatClient.Builder {
                 this.userParams,
                 this.systemText,
                 this.systemParams,
-                this.toolCallbacks,
                 this.messages,
-                this.toolNames,
                 this.media,
                 this.chatOptions,
                 this.advisors,
                 this.advisorParams,
                 this.observationRegistry,
                 this.observationConvention,
-                this.toolContext,
                 this.templateRenderer
             );
         

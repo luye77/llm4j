@@ -1,10 +1,10 @@
-package com.bobo.llm4j.platform.openai.chat.serializer;
+package com.bobo.llm4j.chat.serializer;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.bobo.llm4j.platform.openai.chat.entity.Media;
+import com.bobo.llm4j.chat.entity.Media;
 
 import java.io.IOException;
 import java.util.ArrayList;

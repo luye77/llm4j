@@ -1,11 +1,11 @@
-package com.bobo.llm4j.platform.openai.chat.entity;
+package com.bobo.llm4j.chat.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.bobo.llm4j.platform.openai.chat.serializer.MediaDeserializer;
+import com.bobo.llm4j.chat.serializer.MediaDeserializer;
 import lombok.*;
 
 import java.util.ArrayList;

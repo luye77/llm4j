@@ -1,6 +1,6 @@
 package com.bobo.llm4j.memory;
 
-import com.bobo.llm4j.platform.openai.chat.entity.Message;
+import com.bobo.llm4j.chat.entity.Message;
 
 import java.util.List;
 

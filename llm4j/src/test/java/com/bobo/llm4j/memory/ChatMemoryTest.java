@@ -1,7 +1,7 @@
 package com.bobo.llm4j.memory;
 
-import com.bobo.llm4j.platform.openai.chat.entity.Message;
-import com.bobo.llm4j.platform.openai.chat.enums.MessageType;
+import com.bobo.llm4j.chat.entity.Message;
+import com.bobo.llm4j.enums.MessageType;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

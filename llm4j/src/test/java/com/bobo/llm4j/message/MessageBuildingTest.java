@@ -1,9 +1,9 @@
 package com.bobo.llm4j.message;
 
-import com.bobo.llm4j.platform.openai.chat.entity.Media;
-import com.bobo.llm4j.platform.openai.chat.entity.Message;
-import com.bobo.llm4j.platform.openai.chat.entity.Prompt;
-import com.bobo.llm4j.platform.openai.chat.enums.MessageType;
+import com.bobo.llm4j.chat.entity.Media;
+import com.bobo.llm4j.chat.entity.Message;
+import com.bobo.llm4j.chat.entity.Prompt;
+import com.bobo.llm4j.enums.MessageType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -78,25 +78,6 @@ public class MessageBuildingTest {
         Assert.assertEquals("内容验证", content, message.getContent().getText());
 
         log.info("助手消息: role={}, content={}", message.getRole(), message.getContent().getText());
-    }
-
-    /**
-     * 测试工具消息构建
-     */
-    @Test
-    public void testToolMessageBuilding() {
-        log.info("=== 测试工具消息构建 ===");
-
-        String content = "工具执行结果";
-        String toolCallId = "call_abc123";
-        Message message = Message.withTool(content, toolCallId);
-
-        Assert.assertNotNull("消息不应为空", message);
-        Assert.assertEquals("角色验证", MessageType.TOOL.getRole(), message.getRole());
-        Assert.assertEquals("内容验证", content, message.getContent().getText());
-        Assert.assertEquals("工具调用ID验证", toolCallId, message.getToolCallId());
-
-        log.info("工具消息: role={}, toolCallId={}", message.getRole(), message.getToolCallId());
     }
 
     /**

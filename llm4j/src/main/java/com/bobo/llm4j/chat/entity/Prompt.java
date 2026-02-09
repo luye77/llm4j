@@ -1,10 +1,8 @@
-package com.bobo.llm4j.platform.openai.chat.entity;
+package com.bobo.llm4j.chat.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.bobo.llm4j.platform.openai.tool.ToolDefinition;
 import lombok.*;
 
 import java.util.*;
@@ -79,30 +77,6 @@ public class Prompt {
     private Integer maxCompletionTokens;
 
     /**
-     * 工具定义列表
-     */
-    private List<ToolDefinition> tools;
-
-    /**
-     * 函数名称列表（辅助属性）
-     */
-    @JsonIgnore
-    private List<String> functions;
-
-    /**
-     * 工具选择策略
-     */
-    @JsonProperty("tool_choice")
-    private String toolChoice;
-
-    /**
-     * 是否并行调用工具
-     */
-    @Builder.Default
-    @JsonProperty("parallel_tool_calls")
-    private Boolean parallelToolCalls = true;
-
-    /**
      * 响应格式
      */
     @JsonProperty("response_format")
@@ -137,28 +111,5 @@ public class Prompt {
     @JsonProperty("parameters")
     @Singular
     private Map<String, Object> parameters;
-
-
-    public static class PromptBuilder {
-        private List<String> functions;
-
-        public Prompt.PromptBuilder functions(String... functions){
-            if (this.functions == null) {
-                this.functions = new ArrayList<>();
-            }
-            this.functions.addAll(Arrays.asList(functions));
-            return this;
-        }
-
-        public Prompt.PromptBuilder functions(List<String> functions){
-            if (this.functions == null) {
-                this.functions = new ArrayList<>();
-            }
-            if (functions != null) {
-                this.functions.addAll(functions);
-            }
-            return this;
-        }
-    }
 }
 

@@ -1,6 +1,10 @@
 package com.bobo.llm4j.memory;
 
-import com.bobo.llm4j.platform.openai.chat.entity.Message;
+import com.bobo.llm4j.chat.client.ChatClient;
+import com.bobo.llm4j.chat.model.ChatModel;
+import com.bobo.llm4j.chat.entity.Message;
+import com.bobo.llm4j.platform.openai.chat.OpenAiChatModel;
+import com.bobo.llm4j.config.Configuration;
 
 import java.util.List;
 
@@ -206,25 +210,24 @@ public class ChatMemoryUsageExample {
         System.out.println("Advisor 名称: " + advisor.getName());
         System.out.println("Advisor 顺序: " + advisor.getOrder());
 
-        /*
-         * 在实际使用中，Advisor 会被添加到 ChatClient：
-         * 
-         * ChatClient chatClient = ChatClient.builder(chatModel)
-         *     .defaultAdvisors(advisor)
-         *     .build();
-         * 
-         * String response = chatClient.prompt()
-         *     .user("我叫张三")
-         *     .call()
-         *     .content();
-         * 
-         * // 后续请求会自动包含历史上下文
-         * String response2 = chatClient.prompt()
-         *     .user("我叫什么名字？")
-         *     .call()
-         *     .content();
-         * // 响应：您叫张三
-         */
+        ChatModel chatModel = new OpenAiChatModel(new Configuration());
+
+//      在实际使用中，Advisor 会被添加到 ChatClient：
+        ChatClient chatClient = ChatClient.builder(chatModel)
+                .defaultAdvisors(advisor)
+                .build();
+
+          String response = chatClient.prompt()
+              .user("我叫张三")
+              .call()
+              .content();
+
+          // 后续请求会自动包含历史上下文
+          String response2 = chatClient.prompt()
+              .user("我叫什么名字？")
+              .call()
+              .content();
+          // 响应：您叫张三
 
         System.out.println("\nAdvisor 会自动管理会话记忆，无需手动处理历史消息！");
         System.out.println();

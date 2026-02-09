@@ -1,13 +1,10 @@
-package com.bobo.llm4j.platform.openai.chat.entity;
+package com.bobo.llm4j.chat.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.bobo.llm4j.platform.openai.chat.enums.MessageType;
-import com.bobo.llm4j.platform.openai.tool.ToolCall;
+import com.bobo.llm4j.enums.MessageType;
 import lombok.*;
-
-import java.util.List;
 
 /**
  * Message - 消息实体 (对应Spring AI的Message)
@@ -26,12 +23,6 @@ public class Message {
 
     @JsonProperty("reasoning_content")
     private String reasoningContent;
-
-    @JsonProperty("tool_call_id")
-    private String toolCallId;
-
-    @JsonProperty("tool_calls")
-    private List<ToolCall> toolCalls;
 
     public Message(String userMessage) {
         this.role = MessageType.USER.getRole();
@@ -65,29 +56,6 @@ public class Message {
 
     public static Message withAssistant(String content) {
         return new Message(MessageType.ASSISTANT, content);
-    }
-
-    public static Message withAssistant(List<ToolCall> toolCalls) {
-        return Message.builder()
-                .role(MessageType.ASSISTANT.getRole())
-                .toolCalls(toolCalls)
-                .build();
-    }
-
-    public static Message withAssistant(String content, List<ToolCall> toolCalls) {
-        return Message.builder()
-                .role(MessageType.ASSISTANT.getRole())
-                .content(Media.ofText(content))
-                .toolCalls(toolCalls)
-                .build();
-    }
-
-    public static Message withTool(String content, String toolCallId) {
-        return Message.builder()
-                .role(MessageType.TOOL.getRole())
-                .content(Media.ofText(content))
-                .toolCallId(toolCallId)
-                .build();
     }
 }
 

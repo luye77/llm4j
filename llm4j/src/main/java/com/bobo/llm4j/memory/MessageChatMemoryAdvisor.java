@@ -4,11 +4,10 @@ import com.bobo.llm4j.chat.client.ChatClientRequest;
 import com.bobo.llm4j.chat.client.ChatClientResponse;
 import com.bobo.llm4j.chat.client.advisor.Advisor;
 import com.bobo.llm4j.chat.client.advisor.BaseAdvisorChain;
-import com.bobo.llm4j.platform.openai.chat.entity.ChatResponse;
-import com.bobo.llm4j.platform.openai.chat.entity.Generation;
-import com.bobo.llm4j.platform.openai.chat.entity.Message;
-import com.bobo.llm4j.platform.openai.chat.entity.Prompt;
-import com.bobo.llm4j.platform.openai.chat.enums.MessageType;
+import com.bobo.llm4j.chat.entity.ChatResponse;
+import com.bobo.llm4j.chat.entity.Generation;
+import com.bobo.llm4j.chat.entity.Message;
+import com.bobo.llm4j.enums.MessageType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,8 +92,6 @@ public final class MessageChatMemoryAdvisor implements Advisor {
         return new ChatClientRequest(
                 processedMessages,
                 request.getOptions(),
-                request.getToolNames(),
-                request.getToolCallbacks(),
                 request.getContext(),
                 request.getMedia()
         );

@@ -1,4 +1,4 @@
-package com.bobo.llm4j.platform.openai.chat.entity;
+package com.bobo.llm4j.chat.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

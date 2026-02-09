@@ -3,11 +3,11 @@ package com.bobo.llm4j.chat;
 import com.bobo.llm4j.chat.client.ChatClient;
 import com.bobo.llm4j.chat.model.ChatModel;
 import com.bobo.llm4j.chat.prompt.ChatOptions;
-import com.bobo.llm4j.platform.openai.chat.entity.ChatResponse;
-import com.bobo.llm4j.platform.openai.chat.entity.Message;
-import com.bobo.llm4j.platform.openai.chat.entity.Prompt;
+import com.bobo.llm4j.chat.entity.ChatResponse;
+import com.bobo.llm4j.chat.entity.Message;
+import com.bobo.llm4j.chat.entity.Prompt;
 import com.bobo.llm4j.platform.qwen.chat.QwenChatModel;
-import com.bobo.llm4j.service.Configuration;
+import com.bobo.llm4j.config.Configuration;
 
 /**
  * Example demonstrating how to use ChatClient to avoid directly calling ChatModel
@@ -148,23 +148,23 @@ public class ChatClientTest {
     }
 
     /**
-     * Adapter to convert service.ChatModel to demo.ChatModel
+     * Adapter to wrap QwenChatModel (now it implements the new ChatModel interface)
      */
     private static class QwenChatModelAdapter implements ChatModel {
-        private final com.bobo.llm4j.service.ChatModel serviceModel;
+        private final com.bobo.llm4j.chat.model.ChatModel chatModel;
 
-        public QwenChatModelAdapter(com.bobo.llm4j.service.ChatModel serviceModel) {
-            this.serviceModel = serviceModel;
+        public QwenChatModelAdapter(com.bobo.llm4j.chat.model.ChatModel chatModel) {
+            this.chatModel = chatModel;
         }
 
         @Override
         public ChatResponse call(Prompt prompt) throws Exception {
-            return serviceModel.call(prompt);
+            return chatModel.call(prompt);
         }
 
         @Override
         public ChatOptions getDefaultOptions() {
-            return null; // Can implement default options here if needed
+            return chatModel.getDefaultOptions();
         }
     }
 

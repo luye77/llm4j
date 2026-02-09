@@ -1,4 +1,4 @@
-package com.bobo.llm4j.platform.openai.chat.enums;
+package com.bobo.llm4j.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

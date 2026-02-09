@@ -1,7 +1,5 @@
-package com.bobo.llm4j.service;
+package com.bobo.llm4j.config;
 
-import com.bobo.llm4j.config.OpenAiConfig;
-import com.bobo.llm4j.config.QwenConfig;
 import lombok.Data;
 import okhttp3.OkHttpClient;
 import okhttp3.sse.EventSource;
