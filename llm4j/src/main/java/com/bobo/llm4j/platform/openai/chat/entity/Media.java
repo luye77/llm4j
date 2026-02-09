@@ -14,6 +14,7 @@ import java.util.List;
 /**
  * Media - 媒体内容实体 (对应Spring AI的Media)
  */
+@Getter
 @ToString
 @JsonDeserialize(using = MediaDeserializer.class)
 public class Media {
@@ -41,9 +42,6 @@ public class Media {
         }
         throw new IllegalStateException("Invalid media state");
     }
-
-    public String getText() { return text; }
-    public List<MultiModal> getMultiModals() { return multiModals; }
 
 
     @Data

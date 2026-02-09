@@ -4,7 +4,7 @@ import okhttp3.ConnectionPool;
 
 /**
  * @Author bo
- * @Description ConnectionPool提供�?
+ * @Description ConnectionPool提供
  * @Date 2024/10/16 23:10
  */
 public interface ConnectionPoolProvider {

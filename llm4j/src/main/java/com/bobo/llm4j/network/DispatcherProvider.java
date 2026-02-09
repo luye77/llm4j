@@ -4,7 +4,7 @@ import okhttp3.Dispatcher;
 
 /**
  * @Author bo
- * @Description Dispatcher提供�?
+ * @Description Dispatcher
  * @Date 2024/10/16 23:09
  */
 public interface DispatcherProvider {

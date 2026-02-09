@@ -39,7 +39,7 @@ public class AiConfigAutoConfiguration {
     private final OpenAiConfigProperties openAiConfigProperties;
     private final QwenConfigProperties qwenConfigProperties;
 
-    private com.bobo.llm4j.service.Configuration configuration = new com.bobo.llm4j.service.Configuration();
+    private final com.bobo.llm4j.service.Configuration configuration = new com.bobo.llm4j.service.Configuration();
 
     public AiConfigAutoConfiguration(OkHttpConfigProperties okHttpConfigProperties,
                                      OpenAiConfigProperties openAiConfigProperties,
