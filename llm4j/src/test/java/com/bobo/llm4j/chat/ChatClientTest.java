@@ -12,7 +12,7 @@ import com.bobo.llm4j.service.Configuration;
 /**
  * Example demonstrating how to use ChatClient to avoid directly calling ChatModel
  *
- * <p>ChatClient provides a fluent API for interacting with chat models, offering:
+ * <p>ChatClient provides a fluent API for inte racting with chat models, offering:
  * <ul>
  *   <li>Simplified request building</li>
  *   <li>Default configuration management</li>

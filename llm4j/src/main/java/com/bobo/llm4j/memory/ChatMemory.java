@@ -5,9 +5,41 @@ import com.bobo.llm4j.platform.openai.chat.entity.Message;
 import java.util.List;
 
 /**
- * ChatMemory - 会话记忆接口 (参照 Spring AI 的 ChatMemory)
+ * ChatMemory - 会话记忆接口
+ * <p>
+ * 参考 Spring AI 的 ChatMemory 设计
+ * 负责管理会话的消息上下文，决定哪些消息应该保留
+ * 
+ * @author bobo
+ * @since 1.0.0
  */
 public interface ChatMemory {
+
+    /**
+     * 默认会话ID
+     */
+    String DEFAULT_CONVERSATION_ID = "default";
+
+    /**
+     * 会话ID上下文键名（用于 Advisor 参数传递）
+     */
+    String CONVERSATION_ID = "chat_memory_conversation_id";
+
+    /**
+     * 添加单条消息到指定会话
+     *
+     * @param conversationId 会话ID
+     * @param message 消息
+     */
+    default void add(String conversationId, Message message) {
+        if (conversationId == null || conversationId.trim().isEmpty()) {
+            throw new IllegalArgumentException("conversationId cannot be null or empty");
+        }
+        if (message == null) {
+            throw new IllegalArgumentException("message cannot be null");
+        }
+        this.add(conversationId, List.of(message));
+    }
 
     /**
      * 添加消息到指定会话

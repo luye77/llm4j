@@ -1,6 +1,6 @@
 package com.bobo.llm4j.memory;
 
-import com.bobo.llm4j.listener.StreamingResponseHandler;
+import com.bobo.llm4j.http.StreamingResponseHandler;
 import com.bobo.llm4j.platform.openai.chat.entity.ChatResponse;
 import com.bobo.llm4j.platform.openai.chat.entity.Generation;
 import com.bobo.llm4j.platform.openai.chat.entity.Message;
@@ -13,8 +13,16 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * ChatMemoryChatModel - 带会话记忆的ChatModel装饰器
+ * ChatMemoryChatModel - 带会话记忆的 ChatModel 装饰器
+ * <p>
+ * 已过时：推荐使用 MessageChatMemoryAdvisor + ChatClient 的方式实现会话记忆
+ * 该类仅用于不使用 ChatClient 的场景
+ *
+ * @author bobo
+ * @since 1.0.0
+ * @deprecated 建议使用 {@link MessageChatMemoryAdvisor}
  */
+@Deprecated
 public class ChatMemoryChatModel implements ChatModel {
 
     private final ChatModel delegate;
@@ -22,6 +30,15 @@ public class ChatMemoryChatModel implements ChatModel {
     private final String conversationId;
 
     public ChatMemoryChatModel(ChatModel delegate, ChatMemory chatMemory, String conversationId) {
+        if (delegate == null) {
+            throw new IllegalArgumentException("delegate cannot be null");
+        }
+        if (chatMemory == null) {
+            throw new IllegalArgumentException("chatMemory cannot be null");
+        }
+        if (conversationId == null || conversationId.trim().isEmpty()) {
+            throw new IllegalArgumentException("conversationId cannot be null or empty");
+        }
         this.delegate = delegate;
         this.chatMemory = chatMemory;
         this.conversationId = conversationId;

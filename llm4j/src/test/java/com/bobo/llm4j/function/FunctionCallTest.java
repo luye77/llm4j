@@ -4,7 +4,7 @@ import com.bobo.llm4j.annotation.Tool;
 import com.bobo.llm4j.annotation.ToolParam;
 import com.bobo.llm4j.annotation.ToolRequest;
 import com.bobo.llm4j.base.BaseTest;
-import com.bobo.llm4j.listener.StreamingResponseHandler;
+import com.bobo.llm4j.http.StreamingResponseHandler;
 import com.bobo.llm4j.platform.openai.chat.entity.ChatResponse;
 import com.bobo.llm4j.platform.openai.chat.entity.Message;
 import com.bobo.llm4j.platform.openai.chat.entity.Prompt;

@@ -1,6 +1,6 @@
 package com.bobo.llm4j.service;
 
-import com.bobo.llm4j.listener.StreamingResponseHandler;
+import com.bobo.llm4j.http.StreamingResponseHandler;
 import com.bobo.llm4j.platform.openai.chat.entity.Prompt;
 import com.bobo.llm4j.platform.openai.chat.entity.ChatResponse;
 

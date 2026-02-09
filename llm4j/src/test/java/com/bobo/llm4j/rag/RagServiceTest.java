@@ -1,5 +1,6 @@
 package com.bobo.llm4j.rag;
 
+import com.bobo.llm4j.http.StreamingResponseHandler;
 import com.bobo.llm4j.platform.openai.chat.entity.ChatResponse;
 import com.bobo.llm4j.platform.openai.chat.entity.Generation;
 import com.bobo.llm4j.platform.openai.chat.entity.Message;
@@ -141,12 +142,12 @@ public class RagServiceTest {
         }
 
         @Override
-        public void stream(String baseUrl, String apiKey, Prompt prompt, com.bobo.llm4j.listener.StreamingResponseHandler handler) {
+        public void stream(String baseUrl, String apiKey, Prompt prompt, StreamingResponseHandler handler) {
             throw new UnsupportedOperationException("stream not supported in test");
         }
 
         @Override
-        public void stream(Prompt prompt, com.bobo.llm4j.listener.StreamingResponseHandler handler) {
+        public void stream(Prompt prompt, StreamingResponseHandler handler) {
             throw new UnsupportedOperationException("stream not supported in test");
         }
 

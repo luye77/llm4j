@@ -2,7 +2,7 @@ package com.bobo.llm4j.platform.qwen.chat;
 
 import com.bobo.llm4j.config.QwenConfig;
 import com.bobo.llm4j.constant.Constants;
-import com.bobo.llm4j.listener.StreamingResponseHandler;
+import com.bobo.llm4j.http.StreamingResponseHandler;
 import com.bobo.llm4j.platform.openai.chat.entity.ChatResponse;
 import com.bobo.llm4j.platform.openai.chat.entity.Generation;
 import com.bobo.llm4j.platform.openai.chat.entity.Media;

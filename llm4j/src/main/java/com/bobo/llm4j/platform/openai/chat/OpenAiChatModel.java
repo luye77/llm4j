@@ -3,7 +3,7 @@ package com.bobo.llm4j.platform.openai.chat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.bobo.llm4j.config.OpenAiConfig;
 import com.bobo.llm4j.constant.Constants;
-import com.bobo.llm4j.listener.StreamingResponseHandler;
+import com.bobo.llm4j.http.StreamingResponseHandler;
 import com.bobo.llm4j.platform.openai.chat.entity.*;
 import com.bobo.llm4j.platform.openai.tool.ToolDefinition;
 import com.bobo.llm4j.platform.openai.tool.ToolCall;
