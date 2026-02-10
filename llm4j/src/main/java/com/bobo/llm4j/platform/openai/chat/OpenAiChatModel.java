@@ -15,8 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okhttp3.sse.EventSource;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 /**
  * OpenAiChatModel - OpenAI Chat模型实现 (Spring AI compatible)
  * <p>
@@ -77,7 +75,7 @@ public class OpenAiChatModel implements ChatModel {
         Request request = new Request.Builder()
                 .header("Authorization", "Bearer " + apiKey)
                 .url(ValidateUtil.concatUrl(baseUrl, openAiConfig.getChatCompletionUrl()))
-                .post(RequestBody.create(MediaType.parse(Constants.JSON_CONTENT_TYPE), requestString))
+                .post(RequestBody.create(requestString, MediaType.parse(Constants.JSON_CONTENT_TYPE)))
                 .build();
 
         Response execute = okHttpClient.newCall(request).execute();
@@ -95,6 +93,10 @@ public class OpenAiChatModel implements ChatModel {
 
     /**
      * Internal stream method with optional baseUrl and apiKey override
+     * <p>
+     * This method creates a reactive Flux that emits ChatResponse objects as they
+     * are received from the OpenAI streaming API (Server-Sent Events).
+     * </p>
      * 
      * @param baseUrl optional base URL override (uses config if null)
      * @param apiKey optional API key override (uses config if null)
@@ -103,50 +105,80 @@ public class OpenAiChatModel implements ChatModel {
      * @throws Exception if error occurs
      */
     private Flux<ChatResponse> internalStream(String baseUrl, String apiKey, Prompt prompt) throws Exception {
-        if(baseUrl == null || baseUrl.isEmpty()) baseUrl = openAiConfig.getApiHost();
-        if(apiKey == null || apiKey.isEmpty()) apiKey = openAiConfig.getApiKey();
+        final String finalBaseUrl = (baseUrl == null || baseUrl.isEmpty()) ? openAiConfig.getApiHost() : baseUrl;
+        final String finalApiKey = (apiKey == null || apiKey.isEmpty()) ? openAiConfig.getApiKey() : apiKey;
+        
+        // Set streaming mode
         prompt.setStream(true);
         StreamOptions streamOptions = prompt.getStreamOptions();
         if(streamOptions == null){
             prompt.setStreamOptions(new StreamOptions(true));
         }
 
-        final AtomicReference<Exception> errorRef = new AtomicReference<>();
-        
-        StreamingResponseHandler handler = new StreamingResponseHandler() {
-            @Override
-            protected void send() {
-                // Collect streaming responses
+        // Create Flux that will emit ChatResponse objects
+        return Flux.create(sink -> {
+            try {
+                // Create streaming handler that emits to the Flux
+                StreamingResponseHandler handler = new StreamingResponseHandler() {
+                    @Override
+                    protected void onChunk(ChatResponse response) {
+                        try {
+                            // Emit the response to the Flux
+                            sink.next(response);
+                        } catch (Exception e) {
+                            log.error("Error emitting chunk to Flux", e);
+                            sink.error(e);
+                        }
+                    }
+                    
+                    @Override
+                    protected void onComplete() {
+                        log.debug("Streaming completed");
+                        sink.complete();
+                    }
+                    
+                    @Override
+                    protected void onError(Throwable t, Response response) {
+                        log.error("Streaming error", t);
+                        if (response != null && !response.isSuccessful()) {
+                            try {
+                                String errorBody = response.body() != null ? 
+                                    response.body().string() : "";
+                                sink.error(new RuntimeException(
+                                    "OpenAI API error (status " + response.code() + "): " + errorBody, t));
+                            } catch (Exception e) {
+                                sink.error(t != null ? t : e);
+                            }
+                        } else {
+                            sink.error(t != null ? t : 
+                                new RuntimeException("Unknown streaming error"));
+                        }
+                    }
+                    
+                    @Override
+                    protected void send() {
+                        // Legacy method - not used in Flux mode
+                    }
+                };
+
+                // Build request
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonString = mapper.writeValueAsString(prompt);
+
+                Request request = new Request.Builder()
+                        .header("Authorization", "Bearer " + finalApiKey)
+                        .url(ValidateUtil.concatUrl(finalBaseUrl, openAiConfig.getChatCompletionUrl()))
+                        .post(RequestBody.create(jsonString, MediaType.parse(Constants.APPLICATION_JSON)))
+                        .build();
+
+                // Start SSE connection
+                factory.newEventSource(request, handler);
+                
+            } catch (Exception e) {
+                log.error("Error setting up streaming", e);
+                sink.error(e);
             }
-            
-            @Override
-            protected void error(Throwable t, Response response) {
-                log.error("Streaming error", t);
-                if (t instanceof Exception) {
-                    errorRef.set((Exception) t);
-                }
-            }
-        };
-
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonString = mapper.writeValueAsString(prompt);
-
-        Request request = new Request.Builder()
-                .header("Authorization", "Bearer " + apiKey)
-                .url(ValidateUtil.concatUrl(baseUrl, openAiConfig.getChatCompletionUrl()))
-                .post(RequestBody.create(MediaType.parse(Constants.APPLICATION_JSON), jsonString))
-                .build();
-
-        factory.newEventSource(request, handler);
-        handler.getCountDownLatch().await();
-        
-        if (errorRef.get() != null) {
-            throw errorRef.get();
-        }
-        
-        // Return empty flux for now - streaming implementation needs full reactive support
-        // For full streaming support, consider using real reactive libraries like Project Reactor
-        return Flux.empty();
+        });
     }
 
     /**
@@ -178,7 +210,7 @@ public class OpenAiChatModel implements ChatModel {
         Request request = new Request.Builder()
                 .header("Authorization", "Bearer " + apiKey)
                 .url(ValidateUtil.concatUrl(baseUrl, openAiConfig.getChatCompletionUrl()))
-                .post(RequestBody.create(MediaType.parse(Constants.APPLICATION_JSON), jsonString))
+                .post(RequestBody.create(jsonString, MediaType.parse(Constants.APPLICATION_JSON)))
                 .build();
 
         factory.newEventSource(request, handler);

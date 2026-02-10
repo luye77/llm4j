@@ -1,7 +1,6 @@
 package com.bobo.llm4j.chat.model;
 
 import com.bobo.llm4j.chat.client.ChatOptions;
-import com.bobo.llm4j.http.Flux;
 import com.bobo.llm4j.chat.entity.ChatResponse;
 import com.bobo.llm4j.chat.entity.Prompt;
 
@@ -23,8 +22,9 @@ import com.bobo.llm4j.chat.entity.Prompt;
  * @see ChatOptions
  * @see Prompt
  * @see ChatResponse
+ * @see StreamingChatModel
  */
-public interface ChatModel {
+public interface ChatModel extends StreamingChatModel {
 
     /**
      * Synchronously call the AI model with a prompt and return the response.
@@ -53,36 +53,6 @@ public interface ChatModel {
      */
     default ChatResponse call(String message) throws Exception {
         throw new UnsupportedOperationException("String message call is not supported");
-    }
-
-    /**
-     * Stream the AI model response as a reactive Flux.
-     * <p>
-     * This method sends a prompt to the AI model and returns a reactive stream
-     * of chat responses. This allows for real-time processing of the model's
-     * output as it's generated (Server-Sent Events).
-     * </p>
-     * 
-     * @param prompt the prompt containing messages and optional runtime options
-     * @return a Flux stream of ChatResponse objects
-     * @throws Exception if an error occurs during the API call
-     */
-    default Flux<ChatResponse> stream(Prompt prompt) throws Exception {
-        throw new UnsupportedOperationException("Streaming is not supported by this model");
-    }
-
-    /**
-     * Simplified stream method that accepts a plain text message.
-     * <p>
-     * This is a convenience method for simple streaming use cases.
-     * </p>
-     * 
-     * @param message the user message text
-     * @return a Flux stream of ChatResponse objects
-     * @throws Exception if an error occurs during the API call
-     */
-    default Flux<ChatResponse> stream(String message) throws Exception {
-        throw new UnsupportedOperationException("String message streaming is not supported");
     }
 
     /**
