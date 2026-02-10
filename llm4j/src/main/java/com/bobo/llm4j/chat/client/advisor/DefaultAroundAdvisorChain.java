@@ -5,7 +5,7 @@ import com.bobo.llm4j.chat.client.ChatClientResponse;
 import com.bobo.llm4j.chat.model.ChatModelCallAdvisor;
 import com.bobo.llm4j.chat.model.ChatModelStreamAdvisor;
 import com.bobo.llm4j.http.Flux;
-import com.bobo.llm4j.chat.client.ObservationRegistry;
+import com.bobo.llm4j.chat.client.observe.ObservationRegistry;
 import com.bobo.llm4j.template.TemplateRenderer;
 
 import java.util.ArrayList;

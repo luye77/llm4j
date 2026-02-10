@@ -1,6 +1,5 @@
 package com.bobo.llm4j.chat.client;
 
-import com.bobo.llm4j.chat.prompt.ChatOptions;
 import com.bobo.llm4j.chat.entity.Media;
 import com.bobo.llm4j.chat.entity.Message;
 import lombok.Getter;

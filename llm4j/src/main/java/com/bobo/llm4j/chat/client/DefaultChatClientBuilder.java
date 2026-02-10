@@ -2,8 +2,9 @@ package com.bobo.llm4j.chat.client;
 
 import cn.hutool.core.lang.Assert;
 import com.bobo.llm4j.chat.client.advisor.Advisor;
+import com.bobo.llm4j.chat.client.observe.ChatClientObservationConvention;
+import com.bobo.llm4j.chat.client.observe.ObservationRegistry;
 import com.bobo.llm4j.chat.model.ChatModel;
-import com.bobo.llm4j.chat.prompt.ChatOptions;
 import com.bobo.llm4j.chat.util.StringUtils;
 import com.bobo.llm4j.chat.entity.Media;
 import com.bobo.llm4j.chat.entity.Message;

@@ -2,7 +2,7 @@ package com.bobo.llm4j.chat;
 
 import com.bobo.llm4j.chat.client.ChatClient;
 import com.bobo.llm4j.chat.model.ChatModel;
-import com.bobo.llm4j.chat.prompt.ChatOptions;
+import com.bobo.llm4j.chat.client.ChatOptions;
 import com.bobo.llm4j.chat.entity.ChatResponse;
 import com.bobo.llm4j.chat.entity.Message;
 import com.bobo.llm4j.chat.entity.Prompt;
