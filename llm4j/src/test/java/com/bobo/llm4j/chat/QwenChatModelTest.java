@@ -2,56 +2,56 @@ package com.bobo.llm4j.chat;
 
 import com.bobo.llm4j.chat.client.ChatOptions;
 import com.bobo.llm4j.chat.entity.ChatResponse;
+import com.bobo.llm4j.chat.entity.Media;
 import com.bobo.llm4j.chat.entity.Message;
 import com.bobo.llm4j.chat.entity.Prompt;
 import com.bobo.llm4j.chat.model.ChatModel;
 import com.bobo.llm4j.config.Configuration;
-import com.bobo.llm4j.config.OpenAiConfig;
+import com.bobo.llm4j.config.QwenConfig;
 import com.bobo.llm4j.http.Flux;
-import com.bobo.llm4j.platform.openai.chat.OpenAiChatModel;
-import com.bobo.llm4j.platform.openai.chat.OpenAiChatOptions;
+import com.bobo.llm4j.platform.qwen.chat.QwenChatModel;
+import com.bobo.llm4j.platform.qwen.chat.QwenChatOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * StreamingChatModel 测试类
+ * QwenChatModel 测试类
  * <p>
- * 演示如何使用新的流式API和ChatOptions
+ * 演示如何使用千问(Qwen)模型的流式API和ChatOptions
  * </p>
  */
 @Slf4j
-@Disabled("需要配置有效的 OpenAI API Key")
-public class StreamingChatModelTest {
+@Disabled("需要配置有效的千问 API Key")
+public class QwenChatModelTest {
 
     private ChatModel chatModel;
-    private OpenAiChatOptions defaultOptions;
+    private QwenChatOptions defaultOptions;
 
     @BeforeEach
     void setUp() {
-        // 配置 OpenAI
-        OpenAiConfig openAiConfig = OpenAiConfig.builder()
-                .apiHost("https://api.openai.com")
-                .apiKey(System.getenv("OPENAI_API_KEY"))
+        // 配置千问
+        QwenConfig qwenConfig = QwenConfig.builder()
+                .apiHost("https://dashscope.aliyuncs.com/")
+                .apiKey(System.getenv("DASHSCOPE_API_KEY"))
                 .build();
 
         Configuration configuration = Configuration.builder()
-                .openAiConfig(openAiConfig)
+                .qwenConfig(qwenConfig)
                 .build();
 
         // 配置默认选项
-        defaultOptions = OpenAiChatOptions.builder()
-                .model("gpt-3.5-turbo")
+        defaultOptions = QwenChatOptions.builder()
+                .model("qwen-turbo")
                 .temperature(0.7f)
                 .maxTokens(500)
                 .build();
 
-        chatModel = new OpenAiChatModel(configuration, defaultOptions);
+        chatModel = new QwenChatModel(configuration);
     }
 
     /**
@@ -59,16 +59,20 @@ public class StreamingChatModelTest {
      */
     @Test
     void testSynchronousCall() throws Exception {
-        log.info("=== Test Synchronous Call ===");
+        log.info("=== Test Qwen Synchronous Call ===");
 
         Message userMessage = Message.builder()
                 .role("user")
-                .content(Message.Content.builder()
-                        .text("Say hello in Chinese")
-                        .build())
+                .content(Media.ofText("用中文说你好"))
                 .build();
 
-        Prompt prompt = new Prompt(List.of(userMessage));
+        Prompt prompt = Prompt.builder()
+                .message(userMessage)
+                .model(defaultOptions.getModel())
+                .temperature(defaultOptions.getTemperature())
+                .maxCompletionTokens(defaultOptions.getMaxTokens())
+                .build();
+        
         ChatResponse response = chatModel.call(prompt);
 
         log.info("Response: {}", response.getGenerations().get(0).getMessage().getContent().getText());
@@ -80,22 +84,21 @@ public class StreamingChatModelTest {
      */
     @Test
     void testRuntimeOptionsOverride() throws Exception {
-        log.info("=== Test Runtime Options Override ===");
+        log.info("=== Test Qwen Runtime Options Override ===");
 
         Message userMessage = Message.builder()
                 .role("user")
-                .content(Message.Content.builder()
-                        .text("Write a creative poem")
-                        .build())
+                .content(Media.ofText("写一首关于春天的诗"))
                 .build();
 
         // 运行时覆盖选项 - 使用更高的温度以增加创造性
-        OpenAiChatOptions runtimeOptions = OpenAiChatOptions.builder()
-                .temperature(1.2f)  // 覆盖默认的 0.7
-                .maxTokens(1000)    // 覆盖默认的 500
+        Prompt prompt = Prompt.builder()
+                .message(userMessage)
+                .model("qwen-plus")  // 使用更强大的模型
+                .temperature(1.0f)   // 覆盖默认的 0.7
+                .maxCompletionTokens(1000)  // 覆盖默认的 500
                 .build();
-
-        Prompt prompt = new Prompt(List.of(userMessage), runtimeOptions);
+        
         ChatResponse response = chatModel.call(prompt);
 
         log.info("Response: {}", response.getGenerations().get(0).getMessage().getContent().getText());
@@ -107,16 +110,20 @@ public class StreamingChatModelTest {
      */
     @Test
     void testStreamingResponse() throws Exception {
-        log.info("=== Test Streaming Response ===");
+        log.info("=== Test Qwen Streaming Response ===");
 
         Message userMessage = Message.builder()
                 .role("user")
-                .content(Message.Content.builder()
-                        .text("Count from 1 to 10 slowly")
-                        .build())
+                .content(Media.ofText("从1数到10"))
                 .build();
 
-        Prompt prompt = new Prompt(List.of(userMessage));
+        Prompt prompt = Prompt.builder()
+                .message(userMessage)
+                .model(defaultOptions.getModel())
+                .temperature(defaultOptions.getTemperature())
+                .maxCompletionTokens(defaultOptions.getMaxTokens())
+                .build();
+        
         Flux<ChatResponse> stream = chatModel.stream(prompt);
 
         CountDownLatch latch = new CountDownLatch(1);
@@ -126,7 +133,7 @@ public class StreamingChatModelTest {
                 response -> {
                     // 处理每个数据块
                     if (response.getGenerations() != null && !response.getGenerations().isEmpty()) {
-                        var delta = response.getGenerations().get(0).getDelta();
+                        Message delta = response.getGenerations().get(0).getDelta();
                         if (delta != null && delta.getContent() != null && delta.getContent().getText() != null) {
                             String text = delta.getContent().getText();
                             fullResponse.append(text);
@@ -155,32 +162,32 @@ public class StreamingChatModelTest {
      * 测试 ChatOptions 合并
      */
     @Test
-    void testOptionsMetrge() {
-        log.info("=== Test Options Merge ===");
+    void testOptionsMerge() {
+        log.info("=== Test Qwen Options Merge ===");
 
-        OpenAiChatOptions defaults = OpenAiChatOptions.builder()
-                .model("gpt-3.5-turbo")
+        QwenChatOptions defaults = QwenChatOptions.builder()
+                .model("qwen-turbo")
                 .temperature(0.7f)
                 .maxTokens(2000)
                 .frequencyPenalty(0.0f)
                 .build();
 
-        OpenAiChatOptions runtime = OpenAiChatOptions.builder()
+        QwenChatOptions runtime = QwenChatOptions.builder()
                 .temperature(0.9f)   // 覆盖
-                .model("gpt-4")      // 覆盖
+                .model("qwen-max")   // 覆盖
                 .seed(42)            // 新增
                 .build();
 
         ChatOptions merged = defaults.merge(runtime);
 
         log.info("Merged options:");
-        log.info("  Model: {}", merged.getModel());              // gpt-4 (runtime)
+        log.info("  Model: {}", merged.getModel());              // qwen-max (runtime)
         log.info("  Temperature: {}", merged.getTemperature());  // 0.9 (runtime)
         log.info("  MaxTokens: {}", merged.getMaxTokens());      // 2000 (defaults)
         log.info("  Frequency Penalty: {}", merged.getFrequencyPenalty()); // 0.0 (defaults)
         
-        OpenAiChatOptions mergedOpenAi = (OpenAiChatOptions) merged;
-        log.info("  Seed: {}", mergedOpenAi.getSeed());          // 42 (runtime)
+        QwenChatOptions mergedQwen = (QwenChatOptions) merged;
+        log.info("  Seed: {}", mergedQwen.getSeed());            // 42 (runtime)
     }
 
     /**
@@ -188,28 +195,25 @@ public class StreamingChatModelTest {
      */
     @Test
     void testJsonMode() throws Exception {
-        log.info("=== Test JSON Mode ===");
+        log.info("=== Test Qwen JSON Mode ===");
 
         Message systemMessage = Message.builder()
                 .role("system")
-                .content(Message.Content.builder()
-                        .text("You are a helpful assistant that outputs JSON")
-                        .build())
+                .content(Media.ofText("你是一个有帮助的助手，以JSON格式输出"))
                 .build();
 
         Message userMessage = Message.builder()
                 .role("user")
-                .content(Message.Content.builder()
-                        .text("Generate a JSON object with name and age fields for a fictional person")
-                        .build())
+                .content(Media.ofText("生成一个包含姓名和年龄字段的虚拟人物JSON对象"))
                 .build();
 
-        OpenAiChatOptions jsonOptions = OpenAiChatOptions.builder()
-                .model("gpt-3.5-turbo-1106")  // 支持 JSON 模式
-                .responseFormat(OpenAiChatOptions.ResponseFormat.jsonObject())
+        Prompt prompt = Prompt.builder()
+                .message(systemMessage)
+                .message(userMessage)
+                .model("qwen-turbo")
+                .responseFormat(QwenChatOptions.ResponseFormat.jsonObject())
                 .build();
-
-        Prompt prompt = new Prompt(List.of(systemMessage, userMessage), jsonOptions);
+        
         ChatResponse response = chatModel.call(prompt);
 
         String jsonResponse = response.getGenerations().get(0).getMessage().getContent().getText();
@@ -221,19 +225,48 @@ public class StreamingChatModelTest {
      */
     @Test
     void testConvenienceFactories() {
-        log.info("=== Test Convenience Factories ===");
+        log.info("=== Test Qwen Convenience Factories ===");
 
         // 使用预定义的配置
-        OpenAiChatOptions gpt4Options = OpenAiChatOptions.gpt4().build();
-        log.info("GPT-4 defaults: model={}, temp={}, maxTokens={}",
-                gpt4Options.getModel(), gpt4Options.getTemperature(), gpt4Options.getMaxTokens());
+        QwenChatOptions qwenTurboOptions = QwenChatOptions.qwenTurbo().build();
+        log.info("Qwen-Turbo defaults: model={}, temp={}, maxTokens={}",
+                qwenTurboOptions.getModel(), qwenTurboOptions.getTemperature(), qwenTurboOptions.getMaxTokens());
 
-        OpenAiChatOptions gpt4TurboOptions = OpenAiChatOptions.gpt4Turbo().build();
-        log.info("GPT-4 Turbo defaults: model={}, temp={}, maxTokens={}",
-                gpt4TurboOptions.getModel(), gpt4TurboOptions.getTemperature(), gpt4TurboOptions.getMaxTokens());
+        QwenChatOptions qwenPlusOptions = QwenChatOptions.qwenPlus().build();
+        log.info("Qwen-Plus defaults: model={}, temp={}, maxTokens={}",
+                qwenPlusOptions.getModel(), qwenPlusOptions.getTemperature(), qwenPlusOptions.getMaxTokens());
 
-        OpenAiChatOptions defaultsOptions = OpenAiChatOptions.defaults().build();
+        QwenChatOptions qwenMaxOptions = QwenChatOptions.qwenMax().build();
+        log.info("Qwen-Max defaults: model={}, temp={}, maxTokens={}",
+                qwenMaxOptions.getModel(), qwenMaxOptions.getTemperature(), qwenMaxOptions.getMaxTokens());
+
+        QwenChatOptions defaultsOptions = QwenChatOptions.defaults().build();
         log.info("Defaults: model={}, temp={}, maxTokens={}",
                 defaultsOptions.getModel(), defaultsOptions.getTemperature(), defaultsOptions.getMaxTokens());
+    }
+
+    /**
+     * 测试搜索增强功能
+     */
+    @Test
+    void testEnableSearch() throws Exception {
+        log.info("=== Test Qwen Enable Search ===");
+
+        Message userMessage = Message.builder()
+                .role("user")
+                .content(Media.ofText("2024年的奥运会在哪里举办？"))
+                .build();
+
+        Prompt prompt = Prompt.builder()
+                .message(userMessage)
+                .model("qwen-plus")
+                .temperature(0.7f)
+                .maxCompletionTokens(500)
+                .build();
+        
+        // 注意：Prompt 类需要支持 enableSearch 字段才能使用此功能
+        ChatResponse response = chatModel.call(prompt);
+
+        log.info("Response with search: {}", response.getGenerations().get(0).getMessage().getContent().getText());
     }
 }

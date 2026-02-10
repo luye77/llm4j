@@ -31,7 +31,6 @@ import java.util.concurrent.CountDownLatch;
  * 
  * <p>Two usage patterns:</p>
  * <ol>
- *   <li><b>Callback-based</b> (legacy): Override {@link #send()} to process each chunk</li>
  *   <li><b>Flux-based</b> (recommended): Use {@link #onChunk(ChatResponse)} consumer</li>
  * </ol>
  * 
@@ -64,15 +63,7 @@ public abstract class StreamingResponseHandler extends EventSourceListener {
     protected void onError(Throwable t, Response response) {
         log.error("Streaming error", t);
     }
-    
-    /**
-     * Legacy callback for each data chunk
-     * @deprecated Use {@link #onChunk(ChatResponse)} instead
-     */
-    @Deprecated
-    protected void send() {
-        // Legacy support
-    }
+
 
     /**
      * 最终的消息输出
@@ -145,7 +136,6 @@ public abstract class StreamingResponseHandler extends EventSourceListener {
 
         if ("[DONE]".equalsIgnoreCase(data)) {
             currStr = "";
-            this.send();  // Legacy callback
             this.onComplete();  // New callback
             return;
         }
@@ -171,7 +161,6 @@ public abstract class StreamingResponseHandler extends EventSourceListener {
 
         if((generations == null || generations.isEmpty()) && chatResponse.getUsage() != null){
             this.currStr = "";
-            this.send();  // Legacy callback
             this.onChunk(chatResponse);  // New callback
             return;
         }
@@ -184,7 +173,6 @@ public abstract class StreamingResponseHandler extends EventSourceListener {
         try {
             if ((isAllFieldsNull(responseMessage) || (responseMessage.getContent()!= null && StringUtils.isBlank(responseMessage.getContent().getText()))) && generations.get(0).getFinishReason() == null && !isAllFieldsNull(this.usage)) {
                 this.currStr = "";
-                this.send();  // Legacy callback
                 this.onChunk(chatResponse);  // New callback
                 return;
             }
@@ -201,7 +189,6 @@ public abstract class StreamingResponseHandler extends EventSourceListener {
             }else {
                 currStr = "";
             }
-            this.send();  // Legacy callback
             this.onChunk(chatResponse);  // New callback
             return;
         }
@@ -219,7 +206,6 @@ public abstract class StreamingResponseHandler extends EventSourceListener {
         }else {
             isReasoning = false;
             if (responseMessage.getContent() == null) {
-                this.send();  // Legacy callback
                 this.onChunk(chatResponse);  // New callback
                 return;
             }
@@ -227,7 +213,6 @@ public abstract class StreamingResponseHandler extends EventSourceListener {
             currStr = responseMessage.getContent().getText();
         }
 
-        this.send();  // Legacy callback
         this.onChunk(chatResponse);  // New callback
     }
 

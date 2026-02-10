@@ -210,7 +210,10 @@ public class ChatMemoryUsageExample {
         System.out.println("Advisor 名称: " + advisor.getName());
         System.out.println("Advisor 顺序: " + advisor.getOrder());
 
-        ChatModel chatModel = new OpenAiChatModel(new Configuration());
+        Configuration configuration = Configuration.builder()
+                .build();
+
+        ChatModel chatModel = new OpenAiChatModel(configuration);
 
 //      在实际使用中，Advisor 会被添加到 ChatClient：
         ChatClient chatClient = ChatClient.builder(chatModel)
