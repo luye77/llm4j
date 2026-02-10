@@ -9,9 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Base advisor chain for processing requests
+ * BaseAdvisorChain - Advisor 链的基类
+ * <p>
+ * 参考 Spring AI 的 Advisor 链设计
+ * 实现 CallAdvisorChain 和 StreamAdvisorChain 接口
+ *
+ * @author bobo
+ * @since 1.0.0
  */
-public abstract class BaseAdvisorChain {
+public abstract class BaseAdvisorChain implements CallAdvisorChain, StreamAdvisorChain {
     
     protected final List<Advisor> advisors;
     protected final TemplateRenderer templateRenderer;
@@ -22,24 +28,14 @@ public abstract class BaseAdvisorChain {
     }
     
     /**
-     * Process the next call in the chain
-     */
-    public abstract ChatClientResponse nextCall(ChatClientRequest request);
-    
-    /**
-     * Process the next stream in the chain
-     */
-    public abstract Flux<ChatClientResponse> nextStream(ChatClientRequest request);
-    
-    /**
-     * Get advisors for call operations
+     * 获取 Call 操作的 Advisors
      */
     public List<Advisor> getCallAdvisors() {
         return advisors;
     }
     
     /**
-     * Get advisors for stream operations
+     * 获取 Stream 操作的 Advisors
      */
     public List<Advisor> getStreamAdvisors() {
         return advisors;

@@ -12,9 +12,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Default implementation of advisor chain
+ * DefaultAroundAdvisorChain - 默认的 Advisor 链实现
+ * <p>
+ * 参考 Spring AI 的责任链模式
+ * 按顺序执行所有 Advisor 的 adviseCall 或 adviseStream 方法
+ *
+ * @author bobo
+ * @since 1.0.0
  */
 public class DefaultAroundAdvisorChain extends BaseAdvisorChain {
+    
+    private int currentIndex = 0;
     
     private DefaultAroundAdvisorChain(Builder builder) {
         super(builder.advisors, builder.templateRenderer);
@@ -22,23 +30,53 @@ public class DefaultAroundAdvisorChain extends BaseAdvisorChain {
     
     @Override
     public ChatClientResponse nextCall(ChatClientRequest request) {
-        // Apply advisors in order
-        for (Advisor advisor : advisors) {
-            if (advisor instanceof ChatModelCallAdvisor) {
-                return ((ChatModelCallAdvisor) advisor).call(request);
+        // 如果还有 advisor 未执行
+        if (currentIndex < advisors.size()) {
+            Advisor currentAdvisor = advisors.get(currentIndex);
+            currentIndex++;
+            
+            // 如果是 CallAdvisor（包括 BaseAdvisor），调用 adviseCall
+            if (currentAdvisor instanceof CallAdvisor) {
+                CallAdvisor callAdvisor = (CallAdvisor) currentAdvisor;
+                // adviseCall 内部会调用 before -> nextCall -> after
+                return callAdvisor.adviseCall(request, this);
+            }
+            // 如果是 ChatModelCallAdvisor（最后一个 advisor），直接调用模型
+            else if (currentAdvisor instanceof ChatModelCallAdvisor) {
+                return ((ChatModelCallAdvisor) currentAdvisor).call(request);
+            }
+            // 其他类型的 advisor，跳过
+            else {
+                return nextCall(request);
             }
         }
+        
         return ChatClientResponse.builder().build();
     }
     
     @Override
     public Flux<ChatClientResponse> nextStream(ChatClientRequest request) {
-        // Apply advisors in order
-        for (Advisor advisor : advisors) {
-            if (advisor instanceof ChatModelStreamAdvisor) {
-                return ((ChatModelStreamAdvisor) advisor).stream(request);
+        // 如果还有 advisor 未执行
+        if (currentIndex < advisors.size()) {
+            Advisor currentAdvisor = advisors.get(currentIndex);
+            currentIndex++;
+            
+            // 如果是 StreamAdvisor（包括 BaseAdvisor），调用 adviseStream
+            if (currentAdvisor instanceof StreamAdvisor) {
+                StreamAdvisor streamAdvisor = (StreamAdvisor) currentAdvisor;
+                // adviseStream 内部会调用 before -> nextStream -> after
+                return streamAdvisor.adviseStream(request, this);
+            }
+            // 如果是 ChatModelStreamAdvisor（最后一个 advisor），直接调用模型
+            else if (currentAdvisor instanceof ChatModelStreamAdvisor) {
+                return ((ChatModelStreamAdvisor) currentAdvisor).stream(request);
+            }
+            // 其他类型的 advisor，跳过
+            else {
+                return nextStream(request);
             }
         }
+        
         return Flux.empty();
     }
     
