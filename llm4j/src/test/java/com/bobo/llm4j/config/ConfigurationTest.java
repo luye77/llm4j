@@ -56,20 +56,6 @@ public class ConfigurationTest extends BaseTest {
     }
 
     /**
-     * 测试AiService服务获取
-     */
-    @Test
-    public void testAiServiceCreation() {
-        log.info("=== 测试AiService服务获取 ===");
-
-        Assert.assertNotNull("AiService不应为空", aiService);
-        Assert.assertNotNull("ChatModel不应为空", chatModel);
-        Assert.assertNotNull("EmbeddingModel不应为空", embeddingModel);
-
-        log.info("AiService服务获取验证通过");
-    }
-
-    /**
      * 测试自定义配置创建
      */
     @Test

@@ -1,12 +1,15 @@
-package com.bobo.llm4j.chat.client;
+package com.bobo.llm4j.chat.client.observe;
 
+import com.bobo.llm4j.chat.client.ChatClientRequest;
 import com.bobo.llm4j.chat.client.advisor.Advisor;
+import lombok.Getter;
 
 import java.util.List;
 
 /**
  * Context for chat client observations
  */
+@Getter
 public class ChatClientObservationContext {
     
     private final ChatClientRequest request;
@@ -20,23 +23,7 @@ public class ChatClientObservationContext {
         this.stream = builder.stream;
         this.format = builder.format;
     }
-    
-    public ChatClientRequest getRequest() {
-        return request;
-    }
-    
-    public List<Advisor> getAdvisors() {
-        return advisors;
-    }
-    
-    public boolean isStream() {
-        return stream;
-    }
-    
-    public String getFormat() {
-        return format;
-    }
-    
+
     public static Builder builder() {
         return new Builder();
     }

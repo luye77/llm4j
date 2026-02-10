@@ -1,4 +1,4 @@
-package com.bobo.llm4j.chat.client;
+package com.bobo.llm4j.chat.client.observe;
 
 /**
  * Registry for observations - placeholder for monitoring/observability

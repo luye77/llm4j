@@ -2,8 +2,8 @@ package com.bobo.llm4j.memory;
 
 import com.bobo.llm4j.chat.client.ChatClientRequest;
 import com.bobo.llm4j.chat.client.ChatClientResponse;
-import com.bobo.llm4j.chat.client.advisor.Advisor;
-import com.bobo.llm4j.chat.client.advisor.BaseAdvisorChain;
+import com.bobo.llm4j.chat.client.advisor.AdvisorChain;
+import com.bobo.llm4j.chat.client.advisor.BaseAdvisor;
 import com.bobo.llm4j.chat.entity.ChatResponse;
 import com.bobo.llm4j.chat.entity.Generation;
 import com.bobo.llm4j.chat.entity.Message;
@@ -28,7 +28,7 @@ import java.util.Map;
  * @author bobo
  * @since 1.0.0
  */
-public final class MessageChatMemoryAdvisor implements Advisor {
+public final class MessageChatMemoryAdvisor implements BaseAdvisor {
 
     private static final String NAME = "MessageChatMemoryAdvisor";
     private static final int DEFAULT_ORDER = 0;
@@ -66,7 +66,8 @@ public final class MessageChatMemoryAdvisor implements Advisor {
      * @param chain Advisor 链
      * @return 处理后的请求
      */
-    public ChatClientRequest before(ChatClientRequest request, BaseAdvisorChain chain) {
+    @Override
+    public ChatClientRequest before(ChatClientRequest request, AdvisorChain chain) {
         String conversationId = getConversationId(request.getContext(), this.defaultConversationId);
 
         // 1. 获取会话历史
@@ -104,7 +105,8 @@ public final class MessageChatMemoryAdvisor implements Advisor {
      * @param chain Advisor 链
      * @return 原始响应
      */
-    public ChatClientResponse after(ChatClientResponse response, BaseAdvisorChain chain) {
+    @Override
+    public ChatClientResponse after(ChatClientResponse response, AdvisorChain chain) {
         List<Message> assistantMessages = extractAssistantMessages(response);
         
         if (!assistantMessages.isEmpty()) {

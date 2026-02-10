@@ -1,6 +1,4 @@
-package com.bobo.llm4j.chat.converter;
-
-import com.bobo.llm4j.chat.client.ChatClientObservationConvention;
+package com.bobo.llm4j.chat.client.observe;
 
 /**
  * Default implementation of ChatClientObservationConvention

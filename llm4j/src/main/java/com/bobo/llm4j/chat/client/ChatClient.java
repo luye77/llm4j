@@ -2,9 +2,10 @@ package com.bobo.llm4j.chat.client;
 
 import com.bobo.llm4j.annotation.Nullable;
 import com.bobo.llm4j.chat.client.advisor.Advisor;
+import com.bobo.llm4j.chat.client.observe.ChatClientObservationConvention;
+import com.bobo.llm4j.chat.client.observe.ObservationRegistry;
 import com.bobo.llm4j.chat.converter.ParameterizedTypeReference;
 import com.bobo.llm4j.chat.model.ChatModel;
-import com.bobo.llm4j.chat.prompt.ChatOptions;
 import com.bobo.llm4j.http.Flux;
 import com.bobo.llm4j.http.MimeType;
 import com.bobo.llm4j.http.ResponseEntity;

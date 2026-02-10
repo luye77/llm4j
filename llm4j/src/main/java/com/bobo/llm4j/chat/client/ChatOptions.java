@@ -1,4 +1,4 @@
-package com.bobo.llm4j.chat.prompt;
+package com.bobo.llm4j.chat.client;
 
 /**
  * Chat options for configuring chat model behavior

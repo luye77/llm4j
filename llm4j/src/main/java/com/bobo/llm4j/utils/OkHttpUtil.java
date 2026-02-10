@@ -33,9 +33,6 @@ public class OkHttpUtil {
     /**
      * Get initialized SSLContext instance which ignored SSL certification
      *
-     * @return
-     * @throws NoSuchAlgorithmException
-     * @throws KeyManagementException
      */
     public static SSLContext getIgnoreInitedSslContext() throws NoSuchAlgorithmException, KeyManagementException {
         SSLContext sslContext = SSLContext.getInstance("SSL");
@@ -46,7 +43,6 @@ public class OkHttpUtil {
     /**
      * Get HostnameVerifier which ignored SSL certification
      *
-     * @return
      */
     public static HostnameVerifier getIgnoreSslHostnameVerifier() {
         return new HostnameVerifier() {

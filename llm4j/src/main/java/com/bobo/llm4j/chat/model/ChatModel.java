@@ -1,6 +1,6 @@
 package com.bobo.llm4j.chat.model;
 
-import com.bobo.llm4j.chat.prompt.ChatOptions;
+import com.bobo.llm4j.chat.client.ChatOptions;
 import com.bobo.llm4j.http.Flux;
 import com.bobo.llm4j.chat.entity.ChatResponse;
 import com.bobo.llm4j.chat.entity.Prompt;

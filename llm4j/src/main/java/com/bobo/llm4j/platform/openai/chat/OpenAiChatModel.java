@@ -1,11 +1,8 @@
 package com.bobo.llm4j.platform.openai.chat;
 
 import com.bobo.llm4j.chat.entity.ChatResponse;
-import com.bobo.llm4j.chat.entity.Generation;
-import com.bobo.llm4j.chat.entity.Message;
 import com.bobo.llm4j.chat.entity.Prompt;
 import com.bobo.llm4j.chat.entity.StreamOptions;
-import com.bobo.llm4j.chat.entity.Usage;
 import com.bobo.llm4j.chat.model.ChatModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.bobo.llm4j.config.OpenAiConfig;
@@ -18,8 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okhttp3.sse.EventSource;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -87,8 +82,7 @@ public class OpenAiChatModel implements ChatModel {
 
         Response execute = okHttpClient.newCall(request).execute();
         if (execute.isSuccessful() && execute.body() != null){
-            ChatResponse chatResponse = mapper.readValue(execute.body().string(), ChatResponse.class);
-            return chatResponse;
+            return mapper.readValue(execute.body().string(), ChatResponse.class);
         }else{
             return null;
         }
@@ -109,8 +103,8 @@ public class OpenAiChatModel implements ChatModel {
      * @throws Exception if error occurs
      */
     private Flux<ChatResponse> internalStream(String baseUrl, String apiKey, Prompt prompt) throws Exception {
-        if(baseUrl == null || "".equals(baseUrl)) baseUrl = openAiConfig.getApiHost();
-        if(apiKey == null || "".equals(apiKey)) apiKey = openAiConfig.getApiKey();
+        if(baseUrl == null || baseUrl.isEmpty()) baseUrl = openAiConfig.getApiHost();
+        if(apiKey == null || apiKey.isEmpty()) apiKey = openAiConfig.getApiKey();
         prompt.setStream(true);
         StreamOptions streamOptions = prompt.getStreamOptions();
         if(streamOptions == null){
@@ -170,8 +164,8 @@ public class OpenAiChatModel implements ChatModel {
      */
     @Deprecated
     public void streamWithHandler(String baseUrl, String apiKey, Prompt prompt, StreamingResponseHandler handler) throws Exception {
-        if(baseUrl == null || "".equals(baseUrl)) baseUrl = openAiConfig.getApiHost();
-        if(apiKey == null || "".equals(apiKey)) apiKey = openAiConfig.getApiKey();
+        if(baseUrl == null || baseUrl.isEmpty()) baseUrl = openAiConfig.getApiHost();
+        if(apiKey == null || apiKey.isEmpty()) apiKey = openAiConfig.getApiKey();
         prompt.setStream(true);
         StreamOptions streamOptions = prompt.getStreamOptions();
         if(streamOptions == null){
