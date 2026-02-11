@@ -2,8 +2,7 @@ package com.bobo.llm4j.constant;
 
 /**
  * @Author bo
- * @Description TODO
- * @Date 2024/8/11 0:19
+ * @Description 常量
  */
 public class Constants {
     public static final String SSE_CONTENT_TYPE = "text/event-stream";
