@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * QwenChatOptions - 千问模型配置选项 (OpenAI兼容模式)
+ * QwenChatOptions - 千问模型配置选项
  * <p>
  * 千问(Qwen)支持OpenAI兼容的API格式，因此配置项与OpenAI类似。
  * 支持的模型包括: qwen-turbo, qwen-plus, qwen-max 等。

@@ -14,16 +14,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * MessageChatMemoryAdvisor - 会话记忆 Advisor
+ * MessageChatMemoryAdvisor - 会话记忆 Advisor（支持双层记忆架构）
  * <p>
- * 参考 Spring AI 的 MessageChatMemoryAdvisor 设计
+ * 参考 Spring AI 的 MessageChatMemoryAdvisor 设计，增强支持 LayeredChatMemory
  * 通过 Advisor 模式自动管理会话记忆，拦截请求和响应
  * 
  * <p>工作流程：
  * <ul>
- *   <li>请求前：从 ChatMemory 获取历史消息，合并到当前请求中</li>
+ *   <li>请求前：从 ChatMemory 获取记忆上下文，注入到 system prompt</li>
  *   <li>请求后：将用户消息和 AI 回复保存到 ChatMemory</li>
  * </ul>
+ * <p>
  *
  * @author bobo
  * @since 1.0.0
@@ -60,7 +61,7 @@ public final class MessageChatMemoryAdvisor implements BaseAdvisor {
     }
 
     /**
-     * 请求前处理：获取历史消息并合并到当前请求
+     * 请求前处理：获取记忆上下文并注入到请求中
      *
      * @param request 请求对象
      * @param chain Advisor 链
@@ -70,26 +71,27 @@ public final class MessageChatMemoryAdvisor implements BaseAdvisor {
     public ChatClientRequest before(ChatClientRequest request, AdvisorChain chain) {
         String conversationId = getConversationId(request.getContext(), this.defaultConversationId);
 
-        // 1. 获取会话历史
-        List<Message> memoryMessages = this.chatMemory.get(conversationId);
+        List<Message> processedMessages = new ArrayList<>();
 
-        // 2. 构建完整消息列表（历史消息 + 当前消息）
-        List<Message> processedMessages = new ArrayList<>(memoryMessages);
-        
+        // LayeredChatMemory：构建记忆上下文并注入到 system prompt
+        LayeredChatMemory layeredMemory = (LayeredChatMemory) this.chatMemory;
+        String memoryContext = layeredMemory.buildMemoryContext(conversationId);
+
+        // 如果有记忆上下文，增强或创建 system message
+        if (!memoryContext.trim().isEmpty()) {
+            Message enhancedSystemMessage = createOrEnhanceSystemMessage(
+                    request.getMessages(),
+                    memoryContext
+            );
+            processedMessages.add(enhancedSystemMessage);
+        }
+
+        // 添加当前请求的其他消息（排除原始 system message）
         if (request.getMessages() != null) {
-            processedMessages.addAll(request.getMessages());
+            processedMessages.addAll(filterOutSystemMessages(request.getMessages()));
         }
 
-        // 3. 确保 SystemMessage 在第一位（符合 OpenAI 规范）
-        processedMessages = ensureSystemMessageFirst(processedMessages);
-
-        // 4. 保存当前用户消息到记忆
-        Message userMessage = getLastUserMessage(request.getMessages());
-        if (userMessage != null) {
-            this.chatMemory.add(conversationId, userMessage);
-        }
-
-        // 5. 创建新的请求
+        // 创建新的请求
         return new ChatClientRequest(
                 processedMessages,
                 request.getOptions(),
@@ -99,7 +101,7 @@ public final class MessageChatMemoryAdvisor implements BaseAdvisor {
     }
 
     /**
-     * 请求后处理：保存 AI 回复到会话记忆
+     * 请求后处理：保存对话到会话记忆
      *
      * @param response 响应对象
      * @param chain Advisor 链
@@ -107,11 +109,17 @@ public final class MessageChatMemoryAdvisor implements BaseAdvisor {
      */
     @Override
     public ChatClientResponse after(ChatClientResponse response, AdvisorChain chain) {
-        List<Message> assistantMessages = extractAssistantMessages(response);
+        String conversationId = getConversationId(response.getMetadata(), this.defaultConversationId);
         
-        if (!assistantMessages.isEmpty()) {
-            String conversationId = getConversationId(response.getMetadata(), this.defaultConversationId);
-            this.chatMemory.add(conversationId, assistantMessages);
+        // 提取用户消息和助手消息
+
+        // 从响应元数据中提取原始用户消息（如果可用）
+        // 注意：这里假设在请求前已经保存了用户消息，这里主要保存助手回复
+        List<Message> assistantMessages = extractAssistantMessages(response);
+        List<Message> messagesToSave = new ArrayList<>(assistantMessages);
+        
+        if (!messagesToSave.isEmpty()) {
+            this.chatMemory.add(conversationId, messagesToSave);
         }
         
         return response;
@@ -160,21 +168,58 @@ public final class MessageChatMemoryAdvisor implements BaseAdvisor {
     }
 
     /**
-     * 获取最后一条用户消息
+     * 创建或增强 SystemMessage（注入记忆上下文）
      */
-    private Message getLastUserMessage(List<Message> messages) {
+    private Message createOrEnhanceSystemMessage(List<Message> messages, String memoryContext) {
+        Message existingSystemMessage = getFirstSystemMessage(messages);
+        
+        if (existingSystemMessage != null) {
+            // 增强现有的 system message
+            String originalContent = existingSystemMessage.getContent() != null 
+                ? existingSystemMessage.getContent().getText() 
+                : "";
+            
+            String enhancedContent = originalContent + "\n\n" + memoryContext;
+            return Message.withSystem(enhancedContent);
+        } else {
+            // 创建新的 system message
+            return Message.withSystem(memoryContext);
+        }
+    }
+    
+    /**
+     * 获取第一条 SystemMessage
+     */
+    private Message getFirstSystemMessage(List<Message> messages) {
         if (messages == null || messages.isEmpty()) {
             return null;
         }
-
-        for (int i = messages.size() - 1; i >= 0; i--) {
-            Message message = messages.get(i);
-            if (message != null && MessageType.USER.getRole().equals(message.getRole())) {
+        
+        for (Message message : messages) {
+            if (message != null && MessageType.SYSTEM.getRole().equals(message.getRole())) {
                 return message;
             }
         }
         
         return null;
+    }
+    
+    /**
+     * 过滤掉 SystemMessage
+     */
+    private List<Message> filterOutSystemMessages(List<Message> messages) {
+        if (messages == null || messages.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        List<Message> filtered = new ArrayList<>();
+        for (Message message : messages) {
+            if (message != null && !MessageType.SYSTEM.getRole().equals(message.getRole())) {
+                filtered.add(message);
+            }
+        }
+        
+        return filtered;
     }
 
     /**
