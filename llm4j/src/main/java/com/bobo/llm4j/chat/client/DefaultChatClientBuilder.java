@@ -8,6 +8,9 @@ import com.bobo.llm4j.chat.model.ChatModel;
 import com.bobo.llm4j.chat.util.StringUtils;
 import com.bobo.llm4j.chat.entity.Media;
 import com.bobo.llm4j.chat.entity.Message;
+import com.bobo.llm4j.platform.openai.chat.OpenAiChatOptions;
+import com.bobo.llm4j.tool.ToolCallback;
+import com.bobo.llm4j.tool.support.ToolCallbacks;
 import com.bobo.llm4j.template.TemplateRenderer;
 import com.google.common.collect.Lists;
 
@@ -79,6 +82,20 @@ public class DefaultChatClientBuilder implements ChatClient.Builder {
     @Override
     public ChatClient.Builder defaultOptions(ChatOptions chatOptions) {
         this.chatOptions = chatOptions;
+        return this;
+    }
+
+    @Override
+    public ChatClient.Builder defaultTools(Object... tools) {
+        List<ToolCallback> callbacks = ToolCallbacks.from(tools);
+        if (callbacks.isEmpty()) {
+            return this;
+        }
+        ToolCallingChatOptions toolOptions = ensureToolCallingOptions(this.chatOptions);
+        List<ToolCallback> merged = ToolCallingChatOptions.mergeToolCallbacks(
+                callbacks, toolOptions.getToolCallbacks());
+        toolOptions.setToolCallbacks(merged);
+        this.chatOptions = toolOptions;
         return this;
     }
     
@@ -207,5 +224,19 @@ public class DefaultChatClientBuilder implements ChatClient.Builder {
         if (messages != null) {
             this.messages.addAll(messages);
         }
+    }
+
+    private ToolCallingChatOptions ensureToolCallingOptions(ChatOptions options) {
+        if (options instanceof ToolCallingChatOptions) {
+            return (ToolCallingChatOptions) options;
+        }
+        if (options == null) {
+            ChatOptions modelDefaults = chatModel.getDefaultOptions();
+            if (modelDefaults instanceof ToolCallingChatOptions) {
+                return (ToolCallingChatOptions) modelDefaults.copy();
+            }
+            return OpenAiChatOptions.builder().build();
+        }
+        throw new IllegalArgumentException("Options does not support tool calling: " + options.getClass().getName());
     }
 }

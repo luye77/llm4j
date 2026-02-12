@@ -1,7 +1,10 @@
 package com.bobo.llm4j.platform.qwen.chat;
 
 import com.bobo.llm4j.chat.client.ChatOptions;
+import com.bobo.llm4j.chat.client.ToolCallingChatOptions;
+import com.bobo.llm4j.tool.ToolCallback;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +12,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.HashMap;
 
 /**
  * QwenChatOptions - 千问模型配置选项
@@ -27,7 +35,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class QwenChatOptions implements ChatOptions {
+public class QwenChatOptions implements ToolCallingChatOptions {
     
     // ========== Portable ChatOptions Fields ==========
     
@@ -110,6 +118,22 @@ public class QwenChatOptions implements ChatOptions {
      */
     @JsonProperty("enable_search")
     private Boolean enableSearch;
+
+    @JsonIgnore
+    @Builder.Default
+    private List<ToolCallback> toolCallbacks = new ArrayList<ToolCallback>();
+
+    @JsonIgnore
+    @Builder.Default
+    private Set<String> toolNames = new HashSet<String>();
+
+    @JsonIgnore
+    @Builder.Default
+    private Map<String, Object> toolContext = new HashMap<String, Object>();
+
+    @JsonIgnore
+    @Builder.Default
+    private Boolean internalToolExecutionEnabled = true;
     
     // ========== Response Format ==========
     
@@ -242,9 +266,60 @@ public class QwenChatOptions implements ChatOptions {
             if (qwenOther.getEnableSearch() != null) {
                 builder.enableSearch(qwenOther.getEnableSearch());
             }
+            builder.toolCallbacks(ToolCallingChatOptions.mergeToolCallbacks(
+                    qwenOther.getToolCallbacks(), this.getToolCallbacks()));
+            builder.toolNames(ToolCallingChatOptions.mergeToolNames(
+                    qwenOther.getToolNames(), this.getToolNames()));
+            builder.toolContext(ToolCallingChatOptions.mergeToolContext(
+                    qwenOther.getToolContext(), this.getToolContext()));
+            if (qwenOther.getInternalToolExecutionEnabled() != null) {
+                builder.internalToolExecutionEnabled(qwenOther.getInternalToolExecutionEnabled());
+            } else {
+                builder.internalToolExecutionEnabled(this.getInternalToolExecutionEnabled());
+            }
         }
         
         return builder.build();
+    }
+
+    @Override
+    public List<ToolCallback> getToolCallbacks() {
+        return toolCallbacks;
+    }
+
+    @Override
+    public void setToolCallbacks(List<ToolCallback> toolCallbacks) {
+        this.toolCallbacks = toolCallbacks;
+    }
+
+    @Override
+    public Set<String> getToolNames() {
+        return toolNames;
+    }
+
+    @Override
+    public void setToolNames(Set<String> toolNames) {
+        this.toolNames = toolNames;
+    }
+
+    @Override
+    public Map<String, Object> getToolContext() {
+        return toolContext;
+    }
+
+    @Override
+    public void setToolContext(Map<String, Object> toolContext) {
+        this.toolContext = toolContext;
+    }
+
+    @Override
+    public Boolean getInternalToolExecutionEnabled() {
+        return internalToolExecutionEnabled;
+    }
+
+    @Override
+    public void setInternalToolExecutionEnabled(Boolean internalToolExecutionEnabled) {
+        this.internalToolExecutionEnabled = internalToolExecutionEnabled;
     }
     
     // ========== Convenience Factory Methods ==========
