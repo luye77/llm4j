@@ -1,6 +1,7 @@
 package com.bobo.llm4j.platform.qwen.chat;
 
 import com.bobo.llm4j.chat.entity.ChatResponse;
+import com.bobo.llm4j.chat.entity.ChatTool;
 import com.bobo.llm4j.chat.entity.Prompt;
 import com.bobo.llm4j.chat.entity.StreamOptions;
 import com.bobo.llm4j.chat.model.ChatModel;
@@ -10,10 +11,19 @@ import com.bobo.llm4j.constant.Constants;
 import com.bobo.llm4j.http.StreamingResponseHandler;
 import com.bobo.llm4j.config.Configuration;
 import com.bobo.llm4j.http.Flux;
+import com.bobo.llm4j.tool.DefaultToolCallingManager;
+import com.bobo.llm4j.tool.DefaultToolExecutionEligibilityPredicate;
+import com.bobo.llm4j.tool.ToolCallingManager;
+import com.bobo.llm4j.tool.ToolDefinition;
+import com.bobo.llm4j.tool.ToolExecutionEligibilityPredicate;
+import com.bobo.llm4j.tool.ToolExecutionResult;
 import com.bobo.llm4j.utils.ValidateUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okhttp3.sse.EventSource;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * QwenChatModel - 千问(Qwen) Chat模型实现 (OpenAI兼容模式)
@@ -38,6 +48,8 @@ public class QwenChatModel implements ChatModel {
     private final QwenConfig qwenConfig;
     private final OkHttpClient okHttpClient;
     private final EventSource.Factory factory;
+    private final ToolCallingManager toolCallingManager;
+    private final ToolExecutionEligibilityPredicate toolExecutionEligibilityPredicate;
 
     /**
      * 构造函数 - 使用 Configuration 中的 QwenConfig
@@ -48,6 +60,8 @@ public class QwenChatModel implements ChatModel {
         this.qwenConfig = configuration.getQwenConfig();
         this.okHttpClient = configuration.getOkHttpClient();
         this.factory = configuration.createRequestFactory();
+        this.toolCallingManager = new DefaultToolCallingManager();
+        this.toolExecutionEligibilityPredicate = new DefaultToolExecutionEligibilityPredicate();
     }
 
     /**
@@ -60,11 +74,28 @@ public class QwenChatModel implements ChatModel {
         this.qwenConfig = qwenConfig;
         this.okHttpClient = configuration.getOkHttpClient();
         this.factory = configuration.createRequestFactory();
+        this.toolCallingManager = new DefaultToolCallingManager();
+        this.toolExecutionEligibilityPredicate = new DefaultToolExecutionEligibilityPredicate();
     }
 
     @Override
     public ChatResponse call(Prompt prompt) throws Exception {
-        return internalCall(null, null, prompt);
+        Prompt requestPrompt = enrichPromptWithToolDefinitions(prompt);
+        ChatResponse response = internalCall(null, null, requestPrompt);
+        int depth = 0;
+        while (toolExecutionEligibilityPredicate.isToolExecutionRequired(requestPrompt, response)) {
+            ToolExecutionResult executionResult = toolCallingManager.executeToolCalls(requestPrompt, response);
+            requestPrompt = requestPrompt.toBuilder()
+                    .messages(executionResult.getConversationHistory())
+                    .build();
+            requestPrompt = enrichPromptWithToolDefinitions(requestPrompt);
+            response = internalCall(null, null, requestPrompt);
+            depth++;
+            if (depth > 8) {
+                throw new IllegalStateException("Tool calling exceeded max depth (8)");
+            }
+        }
+        return response;
     }
 
     /**
@@ -234,5 +265,23 @@ public class QwenChatModel implements ChatModel {
 
         factory.newEventSource(request, handler);
         handler.getCountDownLatch().await();
+    }
+
+    private Prompt enrichPromptWithToolDefinitions(Prompt prompt) {
+        if (prompt == null) {
+            return null;
+        }
+        if (prompt.getTools() != null && !prompt.getTools().isEmpty()) {
+            return prompt;
+        }
+        List<ToolDefinition> toolDefinitions = toolCallingManager.resolveToolDefinitions(prompt);
+        if (toolDefinitions.isEmpty()) {
+            return prompt;
+        }
+        List<ChatTool> requestTools = new ArrayList<ChatTool>();
+        for (ToolDefinition definition : toolDefinitions) {
+            requestTools.add(ChatTool.fromDefinition(definition));
+        }
+        return prompt.toBuilder().tools(requestTools).build();
     }
 }

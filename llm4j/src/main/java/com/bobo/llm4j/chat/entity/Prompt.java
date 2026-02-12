@@ -1,8 +1,10 @@
 package com.bobo.llm4j.chat.entity;
 
+import com.bobo.llm4j.tool.ToolCallback;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.util.*;
@@ -111,5 +113,39 @@ public class Prompt {
     @JsonProperty("parameters")
     @Singular
     private Map<String, Object> parameters;
+
+    /**
+     * Tool definitions exposed to model.
+     */
+    @JsonProperty("tools")
+    private List<ChatTool> tools;
+
+    /**
+     * Tool choice policy.
+     */
+    @JsonProperty("tool_choice")
+    private Object toolChoice;
+
+    @JsonProperty("parallel_tool_calls")
+    private Boolean parallelToolCalls;
+
+    /**
+     * Runtime callbacks, not serialized.
+     */
+    @JsonIgnore
+    @Builder.Default
+    private List<ToolCallback> toolCallbacks = new ArrayList<ToolCallback>();
+
+    @JsonIgnore
+    @Builder.Default
+    private Set<String> toolNames = new HashSet<String>();
+
+    @JsonIgnore
+    @Builder.Default
+    private Map<String, Object> toolContext = new HashMap<String, Object>();
+
+    @JsonIgnore
+    @Builder.Default
+    private Boolean internalToolExecutionEnabled = true;
 }
 

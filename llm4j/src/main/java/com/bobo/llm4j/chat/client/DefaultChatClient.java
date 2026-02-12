@@ -21,8 +21,11 @@ import com.bobo.llm4j.chat.entity.Generation;
 import com.bobo.llm4j.chat.entity.Media;
 import com.bobo.llm4j.chat.entity.Message;
 import com.bobo.llm4j.chat.entity.Prompt;
+import com.bobo.llm4j.platform.openai.chat.OpenAiChatOptions;
 import com.bobo.llm4j.template.StTemplateRenderer;
 import com.bobo.llm4j.template.TemplateRenderer;
+import com.bobo.llm4j.tool.ToolCallback;
+import com.bobo.llm4j.tool.support.ToolCallbacks;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -655,6 +658,20 @@ public class DefaultChatClient implements ChatClient {
             return this;
         }
 
+        @Override
+        public ChatClientRequestSpec tools(Object... tools) {
+            List<ToolCallback> callbacks = ToolCallbacks.from(tools);
+            if (callbacks.isEmpty()) {
+                return this;
+            }
+            ToolCallingChatOptions toolOptions = ensureToolCallingOptions();
+            List<ToolCallback> merged = ToolCallingChatOptions.mergeToolCallbacks(
+                    callbacks, toolOptions.getToolCallbacks());
+            toolOptions.setToolCallbacks(merged);
+            this.chatOptions = toolOptions;
+            return this;
+        }
+
         public ChatClientRequestSpec system(String text) {
             if (!StringUtils.hasText(text)) {
                 throw new IllegalArgumentException("text cannot be null or empty");
@@ -757,6 +774,21 @@ public class DefaultChatClient implements ChatClient {
                     .pushAll(this.advisors)
                     .templateRenderer(this.templateRenderer)
                     .build();
+        }
+
+        private ToolCallingChatOptions ensureToolCallingOptions() {
+            if (this.chatOptions instanceof ToolCallingChatOptions) {
+                return (ToolCallingChatOptions) this.chatOptions;
+            }
+            if (this.chatOptions == null) {
+                ChatOptions modelDefaults = this.chatModel.getDefaultOptions();
+                if (modelDefaults instanceof ToolCallingChatOptions) {
+                    return (ToolCallingChatOptions) modelDefaults.copy();
+                }
+                return OpenAiChatOptions.builder().build();
+            }
+            throw new IllegalArgumentException("Options does not support tool calling: "
+                    + this.chatOptions.getClass().getName());
         }
 
     }

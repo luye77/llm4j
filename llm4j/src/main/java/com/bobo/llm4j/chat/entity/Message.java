@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.bobo.llm4j.enums.MessageType;
 import lombok.*;
 
+import java.util.List;
+
 /**
  * Message - 消息实体 (对应Spring AI的Message)
  */
@@ -23,6 +25,12 @@ public class Message {
 
     @JsonProperty("reasoning_content")
     private String reasoningContent;
+
+    @JsonProperty("tool_calls")
+    private List<ToolCall> toolCalls;
+
+    @JsonProperty("tool_call_id")
+    private String toolCallId;
 
     public Message(String userMessage) {
         this.role = MessageType.USER.getRole();
@@ -56,6 +64,22 @@ public class Message {
 
     public static Message withAssistant(String content) {
         return new Message(MessageType.ASSISTANT, content);
+    }
+
+    public static Message withAssistantToolCalls(String content, List<ToolCall> toolCalls) {
+        return Message.builder()
+                .role(MessageType.ASSISTANT.getRole())
+                .content(content == null ? null : Media.ofText(content))
+                .toolCalls(toolCalls)
+                .build();
+    }
+
+    public static Message withTool(String toolCallId, String content) {
+        return Message.builder()
+                .role(MessageType.TOOL.getRole())
+                .toolCallId(toolCallId)
+                .content(content == null ? null : Media.ofText(content))
+                .build();
     }
 }
 

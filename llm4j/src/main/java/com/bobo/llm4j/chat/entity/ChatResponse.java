@@ -64,5 +64,22 @@ public class ChatResponse {
     public List<Generation> getChoices() {
         return this.generations;
     }
+
+    public boolean hasToolCalls() {
+        if (generations == null || generations.isEmpty()) {
+            return false;
+        }
+        for (Generation generation : generations) {
+            Message message = generation.getMessage();
+            if (message != null && message.getToolCalls() != null && !message.getToolCalls().isEmpty()) {
+                return true;
+            }
+            Message delta = generation.getDelta();
+            if (delta != null && delta.getToolCalls() != null && !delta.getToolCalls().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
