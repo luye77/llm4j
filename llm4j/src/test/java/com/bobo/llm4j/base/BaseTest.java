@@ -122,7 +122,7 @@ public abstract class BaseTest {
         openAiConfig.setApiHost(API_HOST);
         openAiConfig.setApiKey(API_KEY);
 
-        configuration = new Configuration();
+        configuration = Configuration.builder().build();
         configuration.setOpenAiConfig(openAiConfig);
     }
 

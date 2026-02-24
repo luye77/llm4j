@@ -1,8 +1,11 @@
 package com.bobo.llm4j.tool;
 
+import lombok.Getter;
+
 /**
  * Exception thrown when a tool execution fails.
  */
+@Getter
 public class ToolExecutionException extends RuntimeException {
 
     private final ToolDefinition toolDefinition;
@@ -22,7 +25,4 @@ public class ToolExecutionException extends RuntimeException {
         this.toolDefinition = null;
     }
 
-    public ToolDefinition getToolDefinition() {
-        return toolDefinition;
-    }
 }
