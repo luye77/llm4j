@@ -200,8 +200,6 @@ public interface ChatClient {
 
         <T extends ChatOptions> ChatClientRequestSpec options(T options);
 
-        ChatClientRequestSpec tools(Object... tools);
-
         ChatClientRequestSpec system(String text);
 
         ChatClientRequestSpec system(Resource textResource, Charset charset);
@@ -238,8 +236,6 @@ public interface ChatClient {
         Builder defaultAdvisors(List<Advisor> advisors);
 
         Builder defaultOptions(ChatOptions chatOptions);
-
-        Builder defaultTools(Object... tools);
 
         Builder defaultUser(String text);
 

@@ -17,6 +17,11 @@ public class ToolExecutionException extends RuntimeException {
         this.toolDefinition = toolDefinition;
     }
 
+    public ToolExecutionException(String message) {
+        super(message);
+        this.toolDefinition = null;
+    }
+
     public ToolDefinition getToolDefinition() {
         return toolDefinition;
     }
