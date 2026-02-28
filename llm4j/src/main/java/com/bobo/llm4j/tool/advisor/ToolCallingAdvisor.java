@@ -247,7 +247,7 @@ public class ToolCallingAdvisor implements CallAdvisor {
          * Convenience method: scan {@code @Tool}-annotated methods from the given objects.
          */
         public Builder tools(Object... toolObjects) {
-            this.toolCallbacks = ToolCallbacks.from(toolObjects);
+            this.toolCallbacks = ToolCallbacks. from(toolObjects);
             return this;
         }
 

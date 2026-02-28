@@ -12,9 +12,8 @@ import com.bobo.llm4j.http.Flux;
 import com.bobo.llm4j.platform.qwen.chat.QwenChatModel;
 import com.bobo.llm4j.platform.qwen.chat.QwenChatOptions;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -26,14 +25,13 @@ import java.util.concurrent.TimeUnit;
  * </p>
  */
 @Slf4j
-@Disabled("需要配置有效的千问 API Key")
 public class QwenChatModelTest {
 
     private ChatModel chatModel;
     private QwenChatOptions defaultOptions;
 
-    @BeforeEach
-    void setUp() {
+    @Before
+    public void setUp() {
         // 配置千问
         QwenConfig qwenConfig = QwenConfig.builder()
                 .apiHost("https://dashscope.aliyuncs.com/")
@@ -58,7 +56,7 @@ public class QwenChatModelTest {
      * 测试基本的同步调用
      */
     @Test
-    void testSynchronousCall() throws Exception {
+    public void testSynchronousCall() throws Exception {
         log.info("=== Test Qwen Synchronous Call ===");
 
         Message userMessage = Message.builder()
@@ -83,7 +81,7 @@ public class QwenChatModelTest {
      * 测试运行时覆盖选项
      */
     @Test
-    void testRuntimeOptionsOverride() throws Exception {
+    public void testRuntimeOptionsOverride() throws Exception {
         log.info("=== Test Qwen Runtime Options Override ===");
 
         Message userMessage = Message.builder()
@@ -109,7 +107,7 @@ public class QwenChatModelTest {
      * 测试流式响应
      */
     @Test
-    void testStreamingResponse() throws Exception {
+    public void testStreamingResponse() throws Exception {
         log.info("=== Test Qwen Streaming Response ===");
 
         Message userMessage = Message.builder()
@@ -162,7 +160,7 @@ public class QwenChatModelTest {
      * 测试 ChatOptions 合并
      */
     @Test
-    void testOptionsMerge() {
+    public void testOptionsMerge() {
         log.info("=== Test Qwen Options Merge ===");
 
         QwenChatOptions defaults = QwenChatOptions.builder()
@@ -194,7 +192,7 @@ public class QwenChatModelTest {
      * 测试 JSON 模式
      */
     @Test
-    void testJsonMode() throws Exception {
+    public void testJsonMode() throws Exception {
         log.info("=== Test Qwen JSON Mode ===");
 
         Message systemMessage = Message.builder()
@@ -224,7 +222,7 @@ public class QwenChatModelTest {
      * 测试便捷工厂方法
      */
     @Test
-    void testConvenienceFactories() {
+    public void testConvenienceFactories() {
         log.info("=== Test Qwen Convenience Factories ===");
 
         // 使用预定义的配置
@@ -249,7 +247,7 @@ public class QwenChatModelTest {
      * 测试搜索增强功能
      */
     @Test
-    void testEnableSearch() throws Exception {
+    public void testEnableSearch() throws Exception {
         log.info("=== Test Qwen Enable Search ===");
 
         Message userMessage = Message.builder()

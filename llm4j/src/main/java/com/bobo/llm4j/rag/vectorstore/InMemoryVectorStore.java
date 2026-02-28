@@ -2,12 +2,7 @@ package com.bobo.llm4j.rag.vectorstore;
 
 import com.bobo.llm4j.rag.document.RagDocument;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -49,7 +44,7 @@ public class InMemoryVectorStore implements VectorStore {
             RagDocument hit = entry.document.toBuilder().score(score).build();
             hits.add(hit);
         }
-        Collections.sort(hits, new Comparator<RagDocument>() {
+        hits.sort(new Comparator<RagDocument>() {
             @Override
             public int compare(RagDocument a, RagDocument b) {
                 double sa = a.getScore() == null ? 0d : a.getScore();
@@ -66,11 +61,9 @@ public class InMemoryVectorStore implements VectorStore {
         if (key == null || key.trim().isEmpty()) {
             return;
         }
-        Iterator<Entry> iterator = entries.iterator();
-        while (iterator.hasNext()) {
-            Entry entry = iterator.next();
+        for (Entry entry : entries) {
             Object actual = entry.document.getMetadata() == null ? null : entry.document.getMetadata().get(key);
-            if (value == null ? actual == null : value.equals(actual)) {
+            if (Objects.equals(value, actual)) {
                 entries.remove(entry);
             }
         }

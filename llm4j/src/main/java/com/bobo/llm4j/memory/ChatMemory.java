@@ -2,6 +2,7 @@ package com.bobo.llm4j.memory;
 
 import com.bobo.llm4j.chat.entity.Message;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,7 +39,9 @@ public interface ChatMemory {
         if (message == null) {
             throw new IllegalArgumentException("message cannot be null");
         }
-        this.add(conversationId, List.of(message));
+        List<Message> messages = new ArrayList<>();
+        messages.add(message);
+        this.add(conversationId, messages);
     }
 
     /**
