@@ -12,7 +12,7 @@ import org.junit.Test;
  * <ul>
  *     <li>OpenAiConfig配置验证</li>
  *     <li>Configuration组件注入验证</li>
- *     <li>AiService服务获取验证</li>
+ *     <li>Configuration 配置验证</li>
  * </ul>
  * </p>
  *

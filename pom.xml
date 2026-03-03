@@ -6,8 +6,13 @@
 
     <groupId>io.github.luye77</groupId>
     <artifactId>llm4j-sdk</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.2</version>
     <packaging>pom</packaging>
+
+    <properties>
+        <!-- GitHub Packages 不需要 GPG 签名，设为 true 跳过；Maven Central 使用 -Pcentral 时会覆盖 -->
+        <gpg.skip>true</gpg.skip>
+    </properties>
 
     <name>llm4j-sdk</name>
     <description>一款JavaSDK用于快速接入AI大模型应用，整合多平台大模型</description>
@@ -36,6 +41,20 @@
         <developerConnection>scm:git:ssh://github.com/luye77/llm4j.git</developerConnection>
         <url>https://github.com/luye77/llm4j</url>
     </scm>
+
+    <!-- GitHub Packages 发布地址 -->
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/luye77/llm4j</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </distributionManagement>
 
     <modules>
         <module>llm4j</module>
@@ -78,16 +97,31 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.sonatype.central</groupId>
-                <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.9.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <publishingServerId>central</publishingServerId>
-                    <autoPublish>true</autoPublish>
-                </configuration>
-            </plugin>
+            <!-- 默认使用标准 deploy 到 distributionManagement（GitHub Packages） -->
         </plugins>
     </build>
+
+    <!-- Maven Central 发布：使用 mvn deploy -Pcentral -->
+    <profiles>
+        <profile>
+            <id>central</id>
+            <properties>
+                <gpg.skip>false</gpg.skip>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.9.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

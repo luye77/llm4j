@@ -1,7 +1,10 @@
 package com.bobo.llm4j;
 
+import com.bobo.llm4j.chat.model.ChatModel;
 import com.bobo.llm4j.config.OpenAiConfig;
 import com.bobo.llm4j.config.QwenConfig;
+import com.bobo.llm4j.platform.openai.chat.OpenAiChatModel;
+import com.bobo.llm4j.platform.qwen.chat.QwenChatModel;
 import com.bobo.llm4j.interceptor.ContentTypeInterceptor;
 import com.bobo.llm4j.interceptor.ErrorInterceptor;
 import com.bobo.llm4j.network.ConnectionPoolProvider;
@@ -38,7 +41,7 @@ public class AiConfigAutoConfiguration {
     private final OpenAiConfigProperties openAiConfigProperties;
     private final QwenConfigProperties qwenConfigProperties;
 
-    private final com.bobo.llm4j.config.Configuration configuration = new com.bobo.llm4j.config.Configuration();
+    private final com.bobo.llm4j.config.Configuration configuration = com.bobo.llm4j.config.Configuration.builder().build();
 
     public AiConfigAutoConfiguration(OkHttpConfigProperties okHttpConfigProperties,
                                      OpenAiConfigProperties openAiConfigProperties,
@@ -49,8 +52,18 @@ public class AiConfigAutoConfiguration {
     }
 
     @Bean
-    public AiService aiService() {
-        return new AiService(configuration);
+    public com.bobo.llm4j.config.Configuration llm4jConfiguration() {
+        return configuration;
+    }
+
+    @Bean
+    public ChatModel openAiChatModel() {
+        return new OpenAiChatModel(configuration);
+    }
+
+    @Bean
+    public ChatModel qwenChatModel() {
+        return new QwenChatModel(configuration);
     }
 
     @PostConstruct

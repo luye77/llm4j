@@ -6,10 +6,10 @@
     <groupId>io.github.luye77</groupId>
     <artifactId>llm4j-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0</version>
+    <version>1.0.2</version>
 
     <name>llm4j-spring-boot-starter</name>
-    <description>为llm4j所提供的spring-stater，便于接入spring项目。关于llm4j: 一款JavaSDK用于快速接入AI大模型应用，整合多平台大模型，如OpenAi、Ollama、智谱Zhipu(ChatGLM)、深度求索DeepSeek、月之暗面Moonshot(Kimi)、腾讯混元Hunyuan、零一万物(01)、MiniMax、百川Baichuan等等，提供统一的输入输出(对齐OpenAi)消除差异化，优化函数调用(Tool Call)，优化RAG调用、支持向量数据库(Pinecone)，并且支持JDK1.8，为用户提供快速整合AI的能力。支持MCP协议，支持STDIO,SSE,Streamable HTTP; 支持MCP Server与MCP Client; 支持MCP网关; 支持自定义MCP数据源; 支持MCP自动重连</description>
+    <description>为llm4j所提供的spring-stater，便于接入spring项目。</description>
     <url>https://github.com/luye77/llm4j</url>
 
     <scm>
@@ -17,6 +17,13 @@
         <developerConnection>scm:git:ssh://github.com/luye77/llm4j.git</developerConnection>
         <url>https://github.com/luye77/llm4j</url>
     </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/luye77/llm4j</url>
+        </repository>
+    </distributionManagement>
 
     <licenses>
         <license>
@@ -40,6 +47,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
+        <!-- GitHub Packages 不需要 GPG 签名 -->
+        <gpg.skip>true</gpg.skip>
+        <!-- 跳过 Javadoc 避免编码/格式问题 -->
+        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
 
@@ -99,11 +110,14 @@
                 <artifactId>versions-maven-plugin</artifactId>
                 <version>2.7</version>
             </plugin>
-            <!-- Maven Central: Javadoc -->
+            <!-- Javadoc：GitHub Packages 不强制要求，跳过以避免编码问题 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.6.3</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -112,14 +126,7 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <encoding>UTF-8</encoding>
-                            <docencoding>UTF-8</docencoding>
-                            <charset>UTF-8</charset>
-                            <doclint>none</doclint>
-                            <failOnError>false</failOnError>
-                            <additionalJOptions>
-                                <arg>-J-Dfile.encoding=UTF-8</arg>
-                            </additionalJOptions>
+                            <skip>true</skip>
                         </configuration>
                     </execution>
                 </executions>
@@ -139,7 +146,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Maven Central: GPG 签名 -->
+            <!-- Maven Central: GPG 签名（GitHub Packages 通过 gpg.skip=true 跳过） -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
@@ -152,6 +159,7 @@
                             <goal>sign</goal>
                         </goals>
                         <configuration>
+                            <skip>${gpg.skip}</skip>
                             <gpgArguments>
                                 <arg>--pinentry-mode</arg>
                                 <arg>loopback</arg>
