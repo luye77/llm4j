@@ -6,8 +6,10 @@ import com.bobo.llm4j.chat.client.ChatOptions;
 import com.bobo.llm4j.chat.entity.ChatResponse;
 import com.bobo.llm4j.chat.entity.Message;
 import com.bobo.llm4j.chat.entity.Prompt;
+import com.bobo.llm4j.http.Flux;
 import com.bobo.llm4j.platform.qwen.chat.QwenChatModel;
 import com.bobo.llm4j.config.Configuration;
+import org.junit.Before;
 
 /**
  * Example demonstrating how to use ChatClient to avoid directly calling ChatModel
@@ -28,9 +30,23 @@ public class ChatClientTest {
     /**
      * Example 1: Basic usage with simple text prompt
      */
+    protected static Configuration configuration;
+
+    @Before
+    public void setUp() {
+        initConfiguration();
+    }
+
+    /**
+     * 初始化OpenAI配置
+     */
+    private void initConfiguration() {
+        configuration = Configuration.builder().build();
+    }
+
     public static void example1_BasicUsage() throws Exception {
         // Create a chat model adapter
-        ChatModel chatModel = new QwenChatModelAdapter(new QwenChatModel(new Configuration()));
+        ChatModel chatModel = new QwenChatModelAdapter(new QwenChatModel(configuration));
 
         // Create ChatClient using builder pattern
         ChatClient chatClient = ChatClient.builder(chatModel)
@@ -49,7 +65,7 @@ public class ChatClientTest {
      * Example 2: Using fluent API with system and user messages
      */
     public static void example2_FluentAPI() throws Exception {
-        ChatModel chatModel = new QwenChatModelAdapter(new QwenChatModel(new Configuration()));
+        ChatModel chatModel = new QwenChatModelAdapter(new QwenChatModel(configuration));
 
         // Create client without default configuration
         ChatClient chatClient = ChatClient.builder(chatModel).build();
@@ -68,7 +84,7 @@ public class ChatClientTest {
      * Example 3: Using template parameters
      */
     public static void example3_TemplateParameters() throws Exception {
-        ChatModel chatModel = new QwenChatModelAdapter(new QwenChatModel(new Configuration()));
+        ChatModel chatModel = new QwenChatModelAdapter(new QwenChatModel(configuration));
 
         ChatClient chatClient = ChatClient.builder(chatModel)
                 .defaultSystem("You are an expert on {topic}.")
@@ -88,7 +104,7 @@ public class ChatClientTest {
      * Example 4: Reusing client with different prompts
      */
     public static void example4_ReuseClient() throws Exception {
-        ChatModel chatModel = new QwenChatModelAdapter(new QwenChatModel(new Configuration()));
+        ChatModel chatModel = new QwenChatModelAdapter(new QwenChatModel(configuration));
 
         // Create a client with default system message
         ChatClient chatClient = ChatClient.builder(chatModel)
@@ -109,7 +125,7 @@ public class ChatClientTest {
      * Example 5: Getting full ChatResponse
      */
     public static void example5_FullResponse() throws Exception {
-        ChatModel chatModel = new QwenChatModelAdapter(new QwenChatModel(new Configuration()));
+        ChatModel chatModel = new QwenChatModelAdapter(new QwenChatModel(configuration));
 
         ChatClient chatClient = ChatClient.builder(chatModel).build();
 
@@ -129,7 +145,7 @@ public class ChatClientTest {
      * Example 6: Using ChatClient with custom messages
      */
     public static void example6_CustomMessages() throws Exception {
-        ChatModel chatModel = new QwenChatModelAdapter(new QwenChatModel(new Configuration()));
+        ChatModel chatModel = new QwenChatModelAdapter(new QwenChatModel(configuration));
 
         ChatClient chatClient = ChatClient.builder(chatModel).build();
 
@@ -163,8 +179,23 @@ public class ChatClientTest {
         }
 
         @Override
+        public ChatResponse call(String message) throws Exception {
+            return ChatModel.super.call(message);
+        }
+
+        @Override
         public ChatOptions getDefaultOptions() {
             return chatModel.getDefaultOptions();
+        }
+
+        @Override
+        public Flux<ChatResponse> stream(Prompt prompt) throws Exception {
+            return null;
+        }
+
+        @Override
+        public Flux<ChatResponse> stream(String message) throws Exception {
+            return ChatModel.super.stream(message);
         }
     }
 

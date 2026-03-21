@@ -1,10 +1,7 @@
 package com.bobo.llm4j.platform.openai.chat;
 
 import com.bobo.llm4j.chat.client.ChatOptions;
-import com.bobo.llm4j.chat.client.ToolCallingChatOptions;
-import com.bobo.llm4j.tool.ToolCallback;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,10 +10,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.HashMap;
 
 /**
  * OpenAiChatOptions - OpenAI specific chat model options
@@ -42,7 +35,7 @@ import java.util.HashMap;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class OpenAiChatOptions implements ToolCallingChatOptions {
+public class OpenAiChatOptions implements ChatOptions {
     
     // ========== Portable ChatOptions Fields ==========
     
@@ -164,22 +157,6 @@ public class OpenAiChatOptions implements ToolCallingChatOptions {
      */
     @JsonProperty("service_tier")
     private String serviceTier;
-
-    @JsonIgnore
-    @Builder.Default
-    private List<ToolCallback> toolCallbacks = new ArrayList<ToolCallback>();
-
-    @JsonIgnore
-    @Builder.Default
-    private Set<String> toolNames = new HashSet<String>();
-
-    @JsonIgnore
-    @Builder.Default
-    private Map<String, Object> toolContext = new HashMap<String, Object>();
-
-    @JsonIgnore
-    @Builder.Default
-    private Boolean internalToolExecutionEnabled = true;
     
     @Override
     public ChatOptions copy() {
@@ -232,56 +209,7 @@ public class OpenAiChatOptions implements ToolCallingChatOptions {
                 otherOptions.parallelToolCalls : this.parallelToolCalls)
             .serviceTier(otherOptions.serviceTier != null ? 
                 otherOptions.serviceTier : this.serviceTier)
-            .toolCallbacks(ToolCallingChatOptions.mergeToolCallbacks(
-                    otherOptions.getToolCallbacks(), this.getToolCallbacks()))
-            .toolNames(ToolCallingChatOptions.mergeToolNames(
-                    otherOptions.getToolNames(), this.getToolNames()))
-            .toolContext(ToolCallingChatOptions.mergeToolContext(
-                    otherOptions.getToolContext(), this.getToolContext()))
-            .internalToolExecutionEnabled(otherOptions.getInternalToolExecutionEnabled() != null
-                    ? otherOptions.getInternalToolExecutionEnabled()
-                    : this.getInternalToolExecutionEnabled())
             .build();
-    }
-
-    @Override
-    public List<ToolCallback> getToolCallbacks() {
-        return toolCallbacks;
-    }
-
-    @Override
-    public void setToolCallbacks(List<ToolCallback> toolCallbacks) {
-        this.toolCallbacks = toolCallbacks;
-    }
-
-    @Override
-    public Set<String> getToolNames() {
-        return toolNames;
-    }
-
-    @Override
-    public void setToolNames(Set<String> toolNames) {
-        this.toolNames = toolNames;
-    }
-
-    @Override
-    public Map<String, Object> getToolContext() {
-        return toolContext;
-    }
-
-    @Override
-    public void setToolContext(Map<String, Object> toolContext) {
-        this.toolContext = toolContext;
-    }
-
-    @Override
-    public Boolean getInternalToolExecutionEnabled() {
-        return internalToolExecutionEnabled;
-    }
-
-    @Override
-    public void setInternalToolExecutionEnabled(Boolean internalToolExecutionEnabled) {
-        this.internalToolExecutionEnabled = internalToolExecutionEnabled;
     }
     
     /**

@@ -1,13 +1,9 @@
 package com.bobo.llm4j.rag.vectorstore;
 
 import com.bobo.llm4j.rag.document.RagDocument;
+import com.bobo.llm4j.rag.embedding.EmbeddingModel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -15,12 +11,30 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class InMemoryVectorStore implements VectorStore {
 
+    private final EmbeddingModel embeddingModel;
     private final List<Entry> entries = new CopyOnWriteArrayList<Entry>();
 
+    public InMemoryVectorStore(EmbeddingModel embeddingModel) {
+        if (embeddingModel == null) {
+            throw new IllegalArgumentException("embeddingModel must not be null");
+        }
+        this.embeddingModel = embeddingModel;
+    }
+
     @Override
-    public void add(List<RagDocument> documents, List<List<Double>> vectors) {
-        if (documents == null || vectors == null || documents.size() != vectors.size()) {
-            throw new IllegalArgumentException("documents and vectors size must match");
+    public void add(List<RagDocument> documents) {
+        if (documents == null || documents.isEmpty()) {
+            return;
+        }
+        List<String> texts = new ArrayList<String>(documents.size());
+        for (RagDocument doc : documents) {
+            texts.add(doc == null || doc.getText() == null ? "" : doc.getText());
+        }
+        List<List<Double>> vectors;
+        try {
+            vectors = embeddingModel.embedAll(texts);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to embed documents", e);
         }
         for (int i = 0; i < documents.size(); i++) {
             RagDocument doc = documents.get(i);
@@ -33,8 +47,17 @@ public class InMemoryVectorStore implements VectorStore {
     }
 
     @Override
-    public List<RagDocument> similaritySearch(SearchRequest request, List<Double> queryEmbedding) {
-        if (request == null || queryEmbedding == null || queryEmbedding.isEmpty()) {
+    public List<RagDocument> similaritySearch(SearchRequest request) {
+        if (request == null || request.getQuery() == null || request.getQuery().isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Double> queryEmbedding;
+        try {
+            queryEmbedding = embeddingModel.embed(request.getQuery());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to embed query", e);
+        }
+        if (queryEmbedding == null || queryEmbedding.isEmpty()) {
             return Collections.emptyList();
         }
         List<RagDocument> hits = new ArrayList<RagDocument>();
@@ -49,7 +72,7 @@ public class InMemoryVectorStore implements VectorStore {
             RagDocument hit = entry.document.toBuilder().score(score).build();
             hits.add(hit);
         }
-        Collections.sort(hits, new Comparator<RagDocument>() {
+        hits.sort(new Comparator<RagDocument>() {
             @Override
             public int compare(RagDocument a, RagDocument b) {
                 double sa = a.getScore() == null ? 0d : a.getScore();
@@ -66,11 +89,9 @@ public class InMemoryVectorStore implements VectorStore {
         if (key == null || key.trim().isEmpty()) {
             return;
         }
-        Iterator<Entry> iterator = entries.iterator();
-        while (iterator.hasNext()) {
-            Entry entry = iterator.next();
+        for (Entry entry : entries) {
             Object actual = entry.document.getMetadata() == null ? null : entry.document.getMetadata().get(key);
-            if (value == null ? actual == null : value.equals(actual)) {
+            if (Objects.equals(value, actual)) {
                 entries.remove(entry);
             }
         }
@@ -126,4 +147,3 @@ public class InMemoryVectorStore implements VectorStore {
         }
     }
 }
-

@@ -4,23 +4,57 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.bobo.llm4j</groupId>
+    <groupId>io.github.luye77</groupId>
     <artifactId>llm4j-sdk</artifactId>
-
-    <version>1.4.3</version>
-
+    <version>1.0.2</version>
     <packaging>pom</packaging>
+
+    <properties>
+        <!-- GitHub Packages 不需要 GPG 签名，设为 true 跳过；Maven Central 使用 -Pcentral 时会覆盖 -->
+        <gpg.skip>true</gpg.skip>
+    </properties>
+
+    <name>llm4j-sdk</name>
+    <description>一款JavaSDK用于快速接入AI大模型应用，整合多平台大模型</description>
+    <url>https://github.com/luye77/llm4j</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
 
     <developers>
         <developer>
             <id>Bobo</id>
             <name>Bobo</name>
+            <email>Bobo@users.noreply.github.com</email>
             <roles>
                 <role>Developer</role>
             </roles>
         </developer>
     </developers>
 
+    <scm>
+        <connection>scm:git:https://github.com/luye77/llm4j.git</connection>
+        <developerConnection>scm:git:ssh://github.com/luye77/llm4j.git</developerConnection>
+        <url>https://github.com/luye77/llm4j</url>
+    </scm>
+
+    <!-- GitHub Packages 发布地址 -->
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/luye77/llm4j</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </distributionManagement>
 
     <modules>
         <module>llm4j</module>
@@ -29,24 +63,65 @@
 
     <build>
         <defaultGoal>validate</defaultGoal>
+        <pluginManagement>
+            <plugins>
+                <!-- Javadoc for Maven Central -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.6.2</version>
+                    <configuration>
+                        <doclint>none</doclint>
+                        <source>1.8</source>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                </plugin>
+                <!-- Source JAR for Maven Central -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.3.0</version>
+                </plugin>
+                <!-- GPG signing for Maven Central -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>3.1.0</version>
+                    <configuration>
+                        <gpgArguments>
+                            <arg>--pinentry-mode</arg>
+                            <arg>loopback</arg>
+                        </gpgArguments>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
+            <!-- 默认使用标准 deploy 到 distributionManagement（GitHub Packages） -->
         </plugins>
     </build>
 
-
-
+    <!-- Maven Central 发布：使用 mvn deploy -Pcentral -->
+    <profiles>
+        <profile>
+            <id>central</id>
+            <properties>
+                <gpg.skip>false</gpg.skip>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.9.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

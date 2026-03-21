@@ -3,3 +3,9 @@
 /.idea/
 /docs/
 /.vscode/
+
+# 切勿提交含凭证的文件
+settings.xml
+*.local
+.env
+.env.*
